@@ -1,0 +1,14 @@
+task a = start_stop
+{
+    start = command
+    {
+        cmd = "/bin/ls '' -l  he'llo' wo'rl'd 'hello kitty'",
+        working_directory = ""
+    },
+
+    stop = command
+    {
+        cmd = "/bin/ls",
+        working_directory = ""
+    }
+};

@@ -8,6 +8,7 @@
 
 #include "tasks/mount_task.h"
 #include "tasks/hostname_task.h"
+#include "tasks/start_stop_task.h"
 #include "tasks/null_task.h"
 
 task::task(task_description* descr, task_handle_ptr handle)
@@ -25,6 +26,8 @@ task_ptr create_task(task_description* descr)
         return make_unique<task>(descr, create_mount_task(*d));
     else if (hostname_task_data const* d = boost::get<hostname_task_data>(&td))
         return make_unique<task>(descr, create_hostname_task(*d));
+    else if (start_stop_task_data const* d = boost::get<start_stop_task_data>(&td))
+        return make_unique<task>(descr, create_start_stop_task(*d));
     else if (null_task_data const* d = boost::get<null_task_data>(&td))
         return make_unique<task>(descr, create_null_task(*d));
     else

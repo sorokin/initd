@@ -73,10 +73,42 @@ void dump(hostname_task_data const& data, std::ostream& out)
         << "}\n";
 }
 
+void dump(cmd_line const& data, std::ostream& out)
+{
+    out << "[";
+    dump(data.executable, out);
+    for (std::string const& arg : data.arguments)
+    {
+        out << ", ";
+        dump(arg, out);
+    }
+    out << "]";
+}
+
+void dump(command const& data, std::ostream& out)
+{
+    out << "command\n"
+        << "    {\n"
+        << "        cmd = ";
+    dump(data.cmd, out);
+    out << "\n"
+        << "        working_directory = ";
+    dump(data.working_directory, out);
+    out << "\n"
+        << "    }\n";
+}
+
 void dump(start_stop_task_data const& data, std::ostream& out)
 {
     out << "start_stop\n"
-        << "{}\n";
+        << "{\n"
+        << "    start = ";
+    dump(data.start, out);
+    out << "\n"
+        << "    stop = ";
+    dump(data.stop, out);
+    out << "\n"
+        << "}\n";
 }
 void dump(null_task_data const& data, std::ostream& out)
 {

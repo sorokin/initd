@@ -1,14 +1,17 @@
 #ifndef READ_TASK_DATA_H
 #define READ_TASK_DATA_H
 
+#include <algorithm>
+
+#include <boost/next_prior.hpp>
+
 #include "task_data.h"
 #include "hostname_task_data.h"
 #include "null_task_data.h"
 #include "read_value_node.h"
 #include "parser/task_node.h"
+#include "lexer/lexer.h"
 #include "optional_cast.h"
-
-#include <boost/next_prior.hpp>
 
 struct top_level_node;
 
@@ -91,6 +94,187 @@ struct read_value_node_impl<hostname_task_data>
     }
 };
 
+template <>
+struct read_value_node_impl<cmd_line>
+{
+    static const char* get_type_name()
+    {
+        return "cmd_line";
+    }
+
+    static bool can_read(value_node const& node)
+    {
+        return node.get_type() == value_node_type::string;
+    }
+
+    static boost::optional<cmd_line> read(value_node const& node, error_tag_sink& esink)
+    {
+        assert(node.get_type() == value_node_type::string);
+
+        string_node const& cnode = static_cast<string_node const&>(node);
+        std::string const& value = cnode.get_token().get_value();
+
+        std::vector<std::string> split;
+        std::string::const_iterator i = value.cbegin();
+        for (;;)
+        {
+            i = std::find_if(i, value.cend(), [](char c) { return !is_ascii_whitespace(c); });
+            if (i == value.cend())
+                break;
+
+            std::string arg;
+
+            for (;;)
+            {
+                char c = *i;
+                if (c == '\'')
+                {
+                    ++i;
+                    auto j = std::find_if(i, value.cend(), [](char c) { return c == '\''; });
+                    if (j == value.cend())
+                    {
+                        esink.push(error_tag(node.get_range(), "unmatched \'"));
+                        return boost::none;
+                    }
+
+                    arg.insert(arg.end(), i, j);
+                    ++j;
+                    i = j;
+                }
+                else if (c == '\"')
+                {
+                    ++i;
+                    auto j = std::find_if(i, value.cend(), [](char c) { return c == '\"'; });
+                    if (j == value.cend())
+                    {
+                        esink.push(error_tag(node.get_range(), "unmatched \""));
+                        return boost::none;
+                    }
+
+                    arg.insert(arg.end(), i, j);
+                    ++j;
+                    i = j;
+                }
+                else if (is_ascii_whitespace(c))
+                    break;
+                else
+                {
+                    arg += c;
+                    ++i;
+                }
+            }
+
+            split.push_back(arg);
+        }
+
+        if (split.empty())
+        {
+            esink.push(error_tag(node.get_range(), "empty command line"));
+            return boost::none;
+        }
+
+        cmd_line data;
+        data.executable = split[0];
+        data.arguments.assign(split.begin() + 1, split.end());
+
+        return data;
+    }
+
+    static boost::optional<cmd_line> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
+    {
+        return boost::none;
+    }
+};
+
+template <>
+struct read_value_node_impl<command>
+{
+    static const char* get_type_name()
+    {
+        return "command";
+    }
+
+    static bool can_read(value_node const& node)
+    {
+        if (node.get_type() != value_node_type::struct_)
+            return false;
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        return cnode.get_tag().get_text() == get_type_name();
+    }
+
+    static boost::optional<command> read(value_node const& node, error_tag_sink& esink)
+    {
+        assert(node.get_type() == value_node_type::struct_);
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        assert(cnode.get_tag().get_text() == get_type_name());
+
+        std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+
+        boost::optional<cmd_line> cmd = extract_property_from_map<cmd_line>(cnode, properties_by_name, "cmd", esink);
+        boost::optional<std::string> working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", esink);
+        if (!cmd || !working_directory)
+            return boost::none;
+
+        command data;
+
+        data.cmd = *cmd;
+        data.working_directory = *working_directory;
+
+        return data;
+    }
+
+    static boost::optional<command> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
+    {
+        return boost::none;
+    }
+};
+
+template <>
+struct read_value_node_impl<start_stop_task_data>
+{
+    static const char* get_type_name()
+    {
+        return "start_stop";
+    }
+
+    static bool can_read(value_node const& node)
+    {
+        if (node.get_type() != value_node_type::struct_)
+            return false;
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        return cnode.get_tag().get_text() == get_type_name();
+    }
+
+    static boost::optional<start_stop_task_data> read(value_node const& node, error_tag_sink& esink)
+    {
+        assert(node.get_type() == value_node_type::struct_);
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        assert(cnode.get_tag().get_text() == get_type_name());
+
+        std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+
+        start_stop_task_data data;
+
+        boost::optional<command> start_cmd = extract_property_from_map<command>(cnode, properties_by_name, "start", esink);
+        boost::optional<command> stop_cmd = extract_property_from_map<command>(cnode, properties_by_name, "stop", esink);
+        if (!start_cmd || !stop_cmd)
+            return boost::none;
+
+        data.start = *start_cmd;
+        data.stop  = *stop_cmd;
+
+        return data;
+    }
+
+    static boost::optional<null_task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
+    {
+        return boost::none;
+    }
+};
 
 template <>
 struct read_value_node_impl<null_task_data>
@@ -138,6 +322,7 @@ struct read_value_node_impl<task_data>
     static bool can_read(value_node const& node)
     {
         return read_value_node_impl<hostname_task_data>::can_read(node)
+            || read_value_node_impl<start_stop_task_data>::can_read(node)
             || read_value_node_impl<null_task_data>::can_read(node);
     }
 
@@ -145,6 +330,8 @@ struct read_value_node_impl<task_data>
     {
         if (can_read_value_node<hostname_task_data>(node))
             return optional_cast<task_data>(read_value_node<hostname_task_data>(node, esink));
+        else if (can_read_value_node<start_stop_task_data>(node))
+            return optional_cast<task_data>(read_value_node<start_stop_task_data>(node, esink));
         else if (can_read_value_node<null_task_data>(node))
             return optional_cast<task_data>(read_value_node<null_task_data>(node, esink));
         else

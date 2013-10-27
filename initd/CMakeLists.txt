@@ -14,4 +14,4 @@ add_executable(initd
    initd-main.cpp
 )
 
-target_link_libraries(initd libinitd libinitd-config initd-readconfig libsysapi ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(initd libinitd initd-readconfig libinitd-config libsysapi ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

@@ -3,6 +3,7 @@
 #include "task_handle.h"
 #include "make_unique.h"
 #include "errors.h"
+#include "current_directory.h"
 
 #include <assert.h>
 #include <unistd.h>
@@ -29,28 +30,41 @@ namespace
             throw std::runtime_error(ss.str());
         }
 
-        std::vector<char*> v;
-        v.push_back(const_cast<char*>(cmd.executable.c_str()));
-
-        for (std::string const& s : cmd.params)
-        {
-            v.push_back(const_cast<char*>(s.c_str()));
-        }
-
-        v.push_back(nullptr);
-
         if (pid == 0)
         {
-            int exec_result = execv(cmd.executable.c_str(), v.data());
-            assert(exec_result < 0);
+            try
+            {
+                std::vector<char*> v;
+                v.push_back(const_cast<char*>(cmd.cmd.executable.c_str()));
 
-            int err = errno;
+                for (std::string const& s : cmd.cmd.arguments)
+                {
+                    v.push_back(const_cast<char*>(s.c_str()));
+                }
 
-            std::stringstream ss;
-            ss << "unable to exec, error: " << sysapi::errno_to_text(err);
+                v.push_back(nullptr);
 
-            std::cerr << ss.str() << std::endl;
-            _Exit(1);
+                sysapi::set_current_directory(cmd.working_directory);
+
+                int exec_result = execv(cmd.cmd.executable.c_str(), v.data());
+                assert(exec_result < 0);
+
+                int err = errno;
+
+                std::stringstream ss;
+                ss << "unable to exec, error: " << sysapi::errno_to_text(err);
+
+                std::cerr << ss.str() << std::endl;
+                _Exit(1);
+            }
+            catch (std::exception const& e)
+            {
+                std::stringstream ss;
+                ss << "error: " << e.what();
+
+                std::cerr << ss.str() << std::endl;
+                _Exit(1);
+            }
         }
 
         int status;
@@ -96,16 +110,6 @@ namespace
     private:
         command stop_cmd;
     };
-}
-
-command::command(std::string const& executable)
-    : executable(executable)
-{}
-
-command::command(std::string const& executable, std::string const& param0)
-    : executable(executable)
-{
-    params.push_back(param0);
 }
 
 task_handle_ptr create_start_stop_task(start_stop_task_data const& data)

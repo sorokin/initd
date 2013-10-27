@@ -4,13 +4,19 @@
 #include <string>
 #include <vector>
 
+struct cmd_line
+{
+    std::string executable;
+    std::vector<std::string> arguments;
+};
+
 struct command
 {
-    command(std::string const& executable);
-    command(std::string const& executable, std::string const& param0);
+    command();
+    command(cmd_line const& cmd);
 
-    std::string executable;
-    std::vector<std::string> params;
+    cmd_line cmd;
+    std::string working_directory;
 };
 
 struct start_stop_task_data
