@@ -1,0 +1,5 @@
+task a = sethostname
+{
+    hostname   = "\\\\",
+    no_restore = false
+}; 

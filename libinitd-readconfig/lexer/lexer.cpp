@@ -243,9 +243,9 @@ token_sp lexer::read_next_token()
                         error_sink->push(error_tag(text_range(escape_start, pos + 1), "invalid escape character"));
                         value += '\\';
                         value += peek_char();
-                        advance_char();
                         break;
                     }
+                    advance_char();
                 }
             }
             else

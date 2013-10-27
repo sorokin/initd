@@ -1,0 +1,5 @@
+task a = sethostname
+{
+    hostname   = "\a\b\f\n\r\t\v\'\"",
+    no_restore = false
+};

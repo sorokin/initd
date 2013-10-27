@@ -46,7 +46,14 @@ void write_entire_file(fs::path const& filename, std::string const& data)
 
 void dump(std::string const& data, std::ostream& out)
 {
-    out << "\"" << data << "\"";
+    out << "\"";
+    for (char c : data)
+        if (c < ' ' || c == '\"' || c == '\'' || c == '\\')
+            out << "\\x" << (int)c;
+        else
+            out << c;
+
+    out << "\"";
 }
 
 void dump(bool data, std::ostream& out)
