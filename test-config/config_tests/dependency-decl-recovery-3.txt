@@ -1,0 +1,4 @@
+task a = null
+{};
+
+a depends b = = = ; 

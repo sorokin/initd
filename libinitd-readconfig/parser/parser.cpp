@@ -329,7 +329,11 @@ namespace
                 else if (t == token_type::comma)
                     lex.read_token();
                 else
+                {
+                    if (!id)
+                        break;
                     error("expected ',' or ';'");
+                }
             }
 
             expect_token<token_type::semicolon>();

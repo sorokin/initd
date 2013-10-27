@@ -1,0 +1,18 @@
+./config_tests/dependency-decl-recovery-3.txt:3:11: expected ';'
+a depends b = = = ; 
+           ^
+./config_tests/dependency-decl-recovery-3.txt:3:13: expected declaration
+a depends b = = = ; 
+             ^
+./config_tests/dependency-decl-recovery-3.txt:3:15: expected declaration
+a depends b = = = ; 
+               ^
+./config_tests/dependency-decl-recovery-3.txt:3:17: expected declaration
+a depends b = = = ; 
+                 ^
+./config_tests/dependency-decl-recovery-3.txt:3:10~11: task "b" is not declared
+a depends b = = = ; 
+          ~
+
+task a = null
+{}
