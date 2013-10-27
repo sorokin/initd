@@ -9,4 +9,6 @@ add_library(libsysapi
    errors.h
    loop_device.cpp
    loop_device.h
+   current_directory.cpp
+   current_directory.h
 )
