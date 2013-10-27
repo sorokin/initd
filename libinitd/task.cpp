@@ -21,18 +21,26 @@ task::~task()
 
 task_ptr create_task(task_description* descr)
 {
-    task_data const& td = descr->get_data();
-    if (mount_task_data const* d = boost::get<mount_task_data>(&td))
-        return make_unique<task>(descr, create_mount_task(*d));
-    else if (hostname_task_data const* d = boost::get<hostname_task_data>(&td))
-        return make_unique<task>(descr, create_hostname_task(*d));
-    else if (start_stop_task_data const* d = boost::get<start_stop_task_data>(&td))
-        return make_unique<task>(descr, create_start_stop_task(*d));
-    else if (null_task_data const* d = boost::get<null_task_data>(&td))
-        return make_unique<task>(descr, create_null_task(*d));
-    else
+    try
     {
-        assert(false);
+        task_data const& td = descr->get_data();
+        if (mount_task_data const* d = boost::get<mount_task_data>(&td))
+            return make_unique<task>(descr, create_mount_task(*d));
+        else if (hostname_task_data const* d = boost::get<hostname_task_data>(&td))
+            return make_unique<task>(descr, create_hostname_task(*d));
+        else if (start_stop_task_data const* d = boost::get<start_stop_task_data>(&td))
+            return make_unique<task>(descr, create_start_stop_task(*d));
+        else if (null_task_data const* d = boost::get<null_task_data>(&td))
+            return make_unique<task>(descr, create_null_task(*d));
+        else
+        {
+            assert(false);
+            return make_unique<task>(descr, create_null_task(null_task_data{}));
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "error: " << e.what() << std::endl;
         return make_unique<task>(descr, create_null_task(null_task_data{}));
     }
 }

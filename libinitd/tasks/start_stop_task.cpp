@@ -52,7 +52,7 @@ namespace
                 int err = errno;
 
                 std::stringstream ss;
-                ss << "unable to exec, error: " << sysapi::errno_to_text(err);
+                ss << "unable to exec \"" << cmd.cmd.executable << "\", error: " << sysapi::errno_to_text(err);
 
                 std::cerr << ss.str() << std::endl;
                 _Exit(1);
