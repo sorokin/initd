@@ -1,0 +1,5 @@
+task a = sethostname
+{
+    hostname   = "localhost",
+    no_restore = false,
+};

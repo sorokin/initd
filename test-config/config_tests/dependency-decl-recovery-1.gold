@@ -1,0 +1,4 @@
+./config_tests/dependency-decl-recovery-1.txt:0:0~1: task "a" is not declared
+a depends b, c; 
+~
+

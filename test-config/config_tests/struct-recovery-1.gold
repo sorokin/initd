@@ -1,0 +1,9 @@
+./config_tests/struct-recovery-1.txt:2:9: expected ','
+    c = 5
+         ^
+./config_tests/struct-recovery-1.txt:0:9~10: "b" is not a valid type for task
+task a = b
+         ~
+
+task a = null
+{}

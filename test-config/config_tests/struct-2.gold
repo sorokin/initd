@@ -1,0 +1,6 @@
+./config_tests/struct-2.txt:0:9~10: "b" is not a valid type for task
+task a = b
+         ~
+
+task a = null
+{}

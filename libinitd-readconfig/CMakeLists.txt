@@ -1,0 +1,71 @@
+cmake_minimum_required (VERSION 2.6)
+
+project(LIBINITD_READCONFIG)
+
+find_package(Boost 1.48 COMPONENTS system REQUIRED)
+find_package(Threads)
+
+include_directories("${LIBINITD_CONFIG_SOURCE_DIR}")
+include_directories("${LIBINITD_READCONFIG_SOURCE_DIR}")
+include_directories("${LIBINITD_COMMON_SOURCE_DIR}")
+include_directories("${LIBSYSAPI_SOURCE_DIR}")
+include_directories("${Boost_INCLUDE_DIR}")
+
+add_library(initd-readconfig
+   lexer/get_raw_pointer.h
+   lexer/get_raw_pointer.cpp
+   lexer/text_range.h
+   lexer/text_range.cpp
+   lexer/token_type.h
+   lexer/token_fwd.h
+   lexer/token.h
+   lexer/token.cpp
+   lexer/simple_token.h
+   lexer/simple_token.cpp
+   lexer/error_tag.h
+   lexer/error_tag.cpp
+   lexer/identifier_token.h
+   lexer/identifier_token.cpp
+   lexer/string_literal_token.h
+   lexer/string_literal_token.cpp
+   lexer/integer_literal_token.h
+   lexer/integer_literal_token.cpp
+   lexer/lexer.h
+   lexer/lexer.cpp
+   parser/value_node_fwd.h
+   parser/value_node.h
+   parser/value_node.cpp
+   parser/integer_node.h
+   parser/integer_node.cpp
+   parser/string_node.h
+   parser/string_node.cpp
+   parser/boolean_node.h
+   parser/boolean_node.cpp
+   parser/pseudo_identifier_value_node.h
+   parser/pseudo_identifier_value_node.cpp
+   parser/property_node_fwd.h
+   parser/property_node.h
+   parser/property_node.cpp
+   parser/struct_node.h
+   parser/struct_node.cpp
+   parser/task_node_fwd.h
+   parser/task_node.h
+   parser/task_node.cpp
+   parser/dependency_node.h
+   parser/dependency_node.cpp
+   parser/top_level_node_fwd.h
+   parser/top_level_node.h
+   parser/top_level_node.cpp
+   parser/parser.h
+   parser/parser.cpp
+   line_map/line_map.h
+   line_map/line_map.cpp
+   line_map/print_error.h
+   line_map/print_error.cpp
+   read_value_node/read_value_node.h
+   read_value_node/read_value_node.cpp
+   read_value_node/read_task_data.h
+   read_value_node/read_task_data.cpp
+   read_value_node/read_task_description.h
+   read_value_node/read_task_description.cpp
+)

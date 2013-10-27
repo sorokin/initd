@@ -1,0 +1,14 @@
+./config_tests/task-recovery-2.txt:0:10: expected ';'
+task a = 5
+          ^
+./config_tests/task-recovery-2.txt:0:9~10: "int" is not a valid type for task
+task a = 5
+         ~
+./config_tests/task-recovery-2.txt:1:9~10: "int" is not a valid type for task
+task b = 6;
+         ~
+
+task a = null
+{}
+task b = null
+{}

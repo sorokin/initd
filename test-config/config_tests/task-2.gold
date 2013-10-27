@@ -1,0 +1,4 @@
+./config_tests/task-2.txt:0:4: expected task name
+task = xxx {};
+    ^
+

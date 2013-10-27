@@ -1,0 +1,10 @@
+task a = null
+{};
+
+task b = null
+{};
+
+task c = null
+{};
+
+a depends b, c; 

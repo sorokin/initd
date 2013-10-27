@@ -1,0 +1,9 @@
+./config_tests/struct-recovery-2.txt:2:12: expected '='
+    hostname "localhost",
+            ^
+./config_tests/struct-recovery-2.txt:0:9~20: property "hostname" is not found in struct "sethostname"
+task a = sethostname
+         ~~~~~~~~~~~
+
+task a = null
+{}

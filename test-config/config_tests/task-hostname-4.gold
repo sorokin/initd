@@ -1,0 +1,9 @@
+./config_tests/task-hostname-4.txt:2:16: expected value
+    hostname   = ,
+                ^
+./config_tests/task-hostname-4.txt:3:16: expected value
+    no_restore =
+                ^
+
+task a = null
+{}
