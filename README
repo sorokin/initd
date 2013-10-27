@@ -1,0 +1,22 @@
+initd -- simple dependency based init system
+
+
+Library Dependencies:
+
+* boost >=1.49
+
+Build:
+
+~/d/initd$ mkdir build
+~/d/initd$ cd build
+~/d/initd/build$ cmake ..
+~/d/initd/build$ make
+
+Run:
+
+~/d/initd/build$ cd initd
+~/d/initd/build/initd$ ./initd ../../demo.conf
+
+Press ^C to stop initd.
+
+For config example see demo.conf.
