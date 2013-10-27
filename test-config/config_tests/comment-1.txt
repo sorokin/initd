@@ -1,0 +1,9 @@
+/* aba */
+task/*aaaa*/a = sethostname /* ababab */
+{
+    hostname   = "/*local*/host//",
+//    hostname   = "abcdef",
+    no_restore // = true
+        = false,
+};
+ 

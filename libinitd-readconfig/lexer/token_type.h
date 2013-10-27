@@ -7,7 +7,6 @@ enum class token_type
     eof,
     error,
     whitespace,
-    comment,
     identifier,
     integer_literal,
     string_literal,

@@ -108,182 +108,184 @@ void lexer::skip_whitespace()
 
 token_sp lexer::read_next_token()
 {
-    skip_whitespace();
-
-    if (eof_char())
-        return token_sp();
-
-    char const* lex_start = pos;
-
-    if (is_ascii_whitespace(peek_char()))
+    for (;;)
     {
-        advance_char();
-        while (!eof_char() && is_ascii_whitespace(peek_char()))
+        skip_whitespace();
+
+        if (eof_char())
+            return token_sp();
+
+        char const* lex_start = pos;
+
+        if (is_ascii_whitespace(peek_char()))
+        {
             advance_char();
+            while (!eof_char() && is_ascii_whitespace(peek_char()))
+                advance_char();
 
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::whitespace);
-    }
-    else if (is_single_line_comment_start())
-    {
-        advance_char(2);
-        for (;;)
-        {
-            if (eof_char() || is_single_line_comment_end())
-            {
-                advance_char();
-                return make_unique<simple_token>(text_range(lex_start, pos), token_type::comment);
-            }
-            else
-                advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::whitespace);
         }
-    }
-    else if (is_multi_line_comment_start())
-    {
-        advance_char(2);
-        for (;;)
+        else if (is_single_line_comment_start())
         {
-            if (eof_char())
+            advance_char(2);
+            for (;;)
             {
-                error_sink->push(error_tag(text_range::make_empty(pos), "unterminated comment"));
-                return make_unique<simple_token>(text_range(lex_start, pos),
-                                               token_type::comment);
-            }
-            else if (is_multi_line_comment_end())
-            {
-                advance_char(2);
-                return make_unique<simple_token>(text_range(lex_start, pos), token_type::comment);
-            }
-            else
-                advance_char();
-        }
-    }
-    else if (is_identifier_start(peek_char()))
-    {
-        std::string s(1, peek_char());
-        advance_char();
-        while (!eof_char() && is_identifier_trail(peek_char()))
-        {
-            s += peek_char();
-            advance_char();
-        }
-
-        return make_identifier_token(text_range(lex_start, pos), std::move(s));
-    }
-    else if (is_number(peek_char()))
-    {
-        int value = char_to_number(peek_char());
-        advance_char();
-
-        while (!eof_char() && is_number(peek_char()))
-        {
-            value = value * 10 + char_to_number(peek_char());
-            advance_char();
-        }
-
-        return make_unique<integer_literal_token>(text_range(lex_start, pos), value);
-    }
-    else if (peek_char() == '\"')
-    {
-        advance_char();
-
-        std::string value;
-        std::vector<token_sp> errors;
-
-        for (;;)
-        {
-            if (eof_char())
-            {
-                error_sink->push(error_tag(text_range::make_empty(pos), "unterminated string"));
-                return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
-            }
-            else if (peek_char() == '\"')
-            {
-                advance_char();
-                return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
-            }
-            else if (peek_char() == '\\')
-            {
-                const char* escape_start = pos;
-                advance_char();
-                if (!eof_char())
+                if (eof_char() || is_single_line_comment_end())
                 {
-                    switch (peek_char())
+                    advance_char();
+                    break;
+                }
+                else
+                    advance_char();
+            }
+        }
+        else if (is_multi_line_comment_start())
+        {
+            advance_char(2);
+            for (;;)
+            {
+                if (eof_char())
+                {
+                    error_sink->push(error_tag(text_range::make_empty(pos), "unterminated comment"));
+                    break;
+                }
+                else if (is_multi_line_comment_end())
+                {
+                    advance_char(2);
+                    break;
+                }
+                else
+                    advance_char();
+            }
+        }
+        else if (is_identifier_start(peek_char()))
+        {
+            std::string s(1, peek_char());
+            advance_char();
+            while (!eof_char() && is_identifier_trail(peek_char()))
+            {
+                s += peek_char();
+                advance_char();
+            }
+
+            return make_identifier_token(text_range(lex_start, pos), std::move(s));
+        }
+        else if (is_number(peek_char()))
+        {
+            int value = char_to_number(peek_char());
+            advance_char();
+
+            while (!eof_char() && is_number(peek_char()))
+            {
+                value = value * 10 + char_to_number(peek_char());
+                advance_char();
+            }
+
+            return make_unique<integer_literal_token>(text_range(lex_start, pos), value);
+        }
+        else if (peek_char() == '\"')
+        {
+            advance_char();
+
+            std::string value;
+            std::vector<token_sp> errors;
+
+            for (;;)
+            {
+                if (eof_char())
+                {
+                    error_sink->push(error_tag(text_range::make_empty(pos), "unterminated string"));
+                    return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
+                }
+                else if (peek_char() == '\"')
+                {
+                    advance_char();
+                    return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
+                }
+                else if (peek_char() == '\\')
+                {
+                    const char* escape_start = pos;
+                    advance_char();
+                    if (!eof_char())
                     {
-                    case 'a':
-                        value += '\a';
-                        break;
-                    case 'b':
-                        value += '\b';
-                        break;
-                    case 'f':
-                        value += '\f';
-                        break;
-                    case 'n':
-                        value += '\n';
-                        break;
-                    case 'r':
-                        value += '\r';
-                        break;
-                    case 't':
-                        value += '\t';
-                        break;
-                    case 'v':
-                        value += '\v';
-                        break;
-                    case '\\':
-                        value += '\\';
-                        break;
-                    case '\'':
-                        value += '\'';
-                        break;
-                    case '\"':
-                        value += '\"';
-                        break;
-                    default:
-                        error_sink->push(error_tag(text_range(escape_start, pos + 1), "invalid escape character"));
-                        value += '\\';
-                        value += peek_char();
-                        break;
+                        switch (peek_char())
+                        {
+                        case 'a':
+                            value += '\a';
+                            break;
+                        case 'b':
+                            value += '\b';
+                            break;
+                        case 'f':
+                            value += '\f';
+                            break;
+                        case 'n':
+                            value += '\n';
+                            break;
+                        case 'r':
+                            value += '\r';
+                            break;
+                        case 't':
+                            value += '\t';
+                            break;
+                        case 'v':
+                            value += '\v';
+                            break;
+                        case '\\':
+                            value += '\\';
+                            break;
+                        case '\'':
+                            value += '\'';
+                            break;
+                        case '\"':
+                            value += '\"';
+                            break;
+                        default:
+                            error_sink->push(error_tag(text_range(escape_start, pos + 1), "invalid escape character"));
+                            value += '\\';
+                            value += peek_char();
+                            break;
+                        }
+                        advance_char();
                     }
+                }
+                else
+                {
+                    value += peek_char();
                     advance_char();
                 }
             }
-            else
-            {
-                value += peek_char();
-                advance_char();
-            }
         }
-    }
-    else if (peek_char() == '{')
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::lbrace);
-    }
-    else if (peek_char() == '}')
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::rbrace);
-    }
-    else if (peek_char() == '=')
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::equals);
-    }
-    else if (peek_char() == ';')
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::semicolon);
-    }
-    else if (peek_char() == ',')
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::comma);
-    }
-    else
-    {
-        advance_char();
-        return make_unique<simple_token>(text_range(lex_start, pos), token_type::unknown);
+        else if (peek_char() == '{')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::lbrace);
+        }
+        else if (peek_char() == '}')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::rbrace);
+        }
+        else if (peek_char() == '=')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::equals);
+        }
+        else if (peek_char() == ';')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::semicolon);
+        }
+        else if (peek_char() == ',')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::comma);
+        }
+        else
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::unknown);
+        }
     }
 }
 
@@ -308,7 +310,7 @@ void lexer::advance_char(size_t n)
 
 bool lexer::is_single_line_comment_start() const
 {
-    if ((end - pos) >= 2)
+    if ((end - pos) < 2)
         return false;
 
     return *pos == '/' && *(pos + 1) == '/';
@@ -324,7 +326,7 @@ bool lexer::is_single_line_comment_end() const
 
 bool lexer::is_multi_line_comment_start() const
 {
-    if ((end - pos) >= 2)
+    if ((end - pos) < 2)
         return false;
 
     return *pos == '/' && *(pos + 1) == '*';
@@ -332,7 +334,7 @@ bool lexer::is_multi_line_comment_start() const
 
 bool lexer::is_multi_line_comment_end() const
 {
-    if ((end - pos) >= 2)
+    if ((end - pos) < 2)
         return false;
 
     return *pos == '*' && *(pos + 1) == '/';
