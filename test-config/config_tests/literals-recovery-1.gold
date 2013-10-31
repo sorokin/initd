@@ -1,9 +1,9 @@
-./config_tests/literals-recovery-1.txt:0:15: unterminated string
+./config_tests/literals-recovery-1.txt:0:9~15: unterminated string
 task a = "abcde
-               ^
-./config_tests/literals-recovery-1.txt:1:4: unterminated string
+         ~~~~~~
+./config_tests/literals-recovery-1.txt:1:2~4: unterminated string
   ";
-    ^
+  ~~
 ./config_tests/literals-recovery-1.txt:0:15: expected ';'
 task a = "abcde
                ^

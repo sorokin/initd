@@ -194,8 +194,9 @@ token_sp lexer::read_next_token()
             {
                 if (eof_char() || peek_char() == '\n')
                 {
-                    error_sink->push(error_tag(text_range::make_empty(pos), "unterminated string"));
-                    return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
+                    text_range r(lex_start, pos);
+                    error_sink->push(error_tag(r, "unterminated string"));
+                    return make_unique<string_literal_token>(r, std::move(value));
                 }
                 else if (peek_char() == '\"')
                 {
