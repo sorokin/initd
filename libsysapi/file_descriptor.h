@@ -11,6 +11,7 @@ namespace sysapi
     struct file_descriptor
     {
         file_descriptor();
+        file_descriptor(int fd);
         ~file_descriptor();
 
         static file_descriptor open(std::string const& filename, int flags, mode_t mode = 0);
@@ -32,9 +33,6 @@ namespace sysapi
         void write(void const* buf, size_t count);
 
         struct stat get_stat();
-
-    private:
-        file_descriptor(int fd);
 
     private:
         int fd_;

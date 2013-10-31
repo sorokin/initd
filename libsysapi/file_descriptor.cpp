@@ -16,6 +16,10 @@ file_descriptor::file_descriptor()
     : fd_(-1)
 {}
 
+file_descriptor::file_descriptor(int fd)
+    : fd_(fd)
+{}
+
 file_descriptor::~file_descriptor()
 {
     if (fd_ == -1)
@@ -167,10 +171,6 @@ struct stat file_descriptor::get_stat()
 
     return buf;
 }
-
-file_descriptor::file_descriptor(int fd)
-    : fd_(fd)
-{}
 
 std::vector<char> sysapi::read_entire_file(std::string const& filename)
 {
