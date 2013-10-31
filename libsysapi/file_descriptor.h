@@ -38,6 +38,8 @@ namespace sysapi
         int fd_;
     };
 
+    std::pair<file_descriptor, file_descriptor> create_pipe(int flags);
+
     std::vector<char> read_entire_file(std::string const& filename);
 }
 

@@ -172,6 +172,23 @@ struct stat file_descriptor::get_stat()
     return buf;
 }
 
+std::pair<file_descriptor, file_descriptor> sysapi::create_pipe(int flags)
+{
+    int fds[2];
+    int r = ::pipe2(fds, flags);
+    if (r < 0)
+    {
+        int err = errno;
+
+        std::stringstream ss;
+        ss << "unable to create pipe, error: " << sysapi::errno_to_text(err);
+
+        throw std::runtime_error(ss.str());
+    }
+
+    return std::make_pair(file_descriptor(fds[0]), file_descriptor(fds[1]));
+}
+
 std::vector<char> sysapi::read_entire_file(std::string const& filename)
 {
     auto fd = sysapi::file_descriptor::open(filename, O_RDONLY | O_CLOEXEC);
