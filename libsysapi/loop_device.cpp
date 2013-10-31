@@ -12,7 +12,7 @@
 using namespace sysapi;
 
 loop_device::loop_device(std::string const& filename)
-    : fd_(file_descriptor::open(filename, O_RDWR))
+    : fd_(file_descriptor::open(filename, O_RDWR | O_CLOEXEC))
 {}
 
 void loop_device::setfd(int fd)

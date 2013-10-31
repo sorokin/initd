@@ -24,7 +24,7 @@ namespace fs = boost::filesystem;
 
 boost::optional<std::vector<char> > read_entire_file_if_exists(fs::path const& filename)
 {
-    sysapi::file_descriptor fd = sysapi::file_descriptor::open_if_exists(filename.string(), O_RDONLY);
+    sysapi::file_descriptor fd = sysapi::file_descriptor::open_if_exists(filename.string(), O_RDONLY | O_CLOEXEC);
     if (fd.getfd() == -1)
         return boost::none;
 
@@ -39,7 +39,7 @@ boost::optional<std::vector<char> > read_entire_file_if_exists(fs::path const& f
 
 void write_entire_file(fs::path const& filename, std::string const& data)
 {
-    auto fd = sysapi::file_descriptor::open(filename.string(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    auto fd = sysapi::file_descriptor::open(filename.string(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
     fd.write(data.data(), data.size());
 }

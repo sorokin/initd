@@ -174,7 +174,7 @@ file_descriptor::file_descriptor(int fd)
 
 std::vector<char> sysapi::read_entire_file(std::string const& filename)
 {
-    auto fd = sysapi::file_descriptor::open(filename, O_RDONLY);
+    auto fd = sysapi::file_descriptor::open(filename, O_RDONLY | O_CLOEXEC);
     struct stat stat = fd.get_stat();
 
     std::vector<char> res((size_t)stat.st_size);

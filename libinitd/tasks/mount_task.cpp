@@ -170,7 +170,7 @@ namespace
     {
         loop_device_association_guard(std::string const& filename)
         {
-            auto fd = sysapi::file_descriptor::open(filename, O_RDWR);
+            auto fd = sysapi::file_descriptor::open(filename, O_RDWR | O_CLOEXEC);
 
             for (size_t i = 0; i < 8; ++i)
             {
