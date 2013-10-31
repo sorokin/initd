@@ -188,7 +188,6 @@ token_sp lexer::read_next_token()
             advance_char();
 
             std::string value;
-            std::vector<token_sp> errors;
 
             for (;;)
             {
