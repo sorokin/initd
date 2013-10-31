@@ -1,0 +1,21 @@
+./config_tests/literals-raw-string-recovery-1.txt:2:17~24: expected '(' in raw string literal
+    hostname   = R"hello
+                 ~~~~~~~
+./config_tests/literals-raw-string-recovery-1.txt:2:24: expected ','
+    hostname   = R"hello
+                        ^
+./config_tests/literals-raw-string-recovery-1.txt:3:5: expected '='
+world)",
+     ^
+./config_tests/literals-raw-string-recovery-1.txt:3:6~8: unterminated string
+world)",
+      ~~
+./config_tests/literals-raw-string-recovery-1.txt:3:6: expected property
+world)",
+      ^
+
+task a = sethostname
+{
+    hostname   = ""
+    no_restore = false
+}

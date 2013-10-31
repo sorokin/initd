@@ -1,0 +1,6 @@
+task a = sethostname
+{
+    hostname   = R"(hello
+world)",
+    no_restore = false
+};

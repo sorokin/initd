@@ -31,6 +31,8 @@ private:
     bool is_single_line_comment_end() const;
     bool is_multi_line_comment_start() const;
     bool is_multi_line_comment_end() const;
+    bool is_raw_string_literal_start() const;
+    bool is_raw_string_literal_end(std::string const&) const;
 
 private:
     char const* start;

@@ -1,0 +1,5 @@
+task a = sethostname
+{
+    hostname   = "hello\x92nworld"
+    no_restore = false
+}

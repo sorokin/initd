@@ -158,6 +158,63 @@ token_sp lexer::read_next_token()
                     advance_char();
             }
         }
+        else if (is_raw_string_literal_start())
+        {
+            advance_char(2);
+
+            std::string prefix;
+            std::string value;
+
+            for (;;)
+            {
+                if (eof_char()
+                 || peek_char() == ' '
+                 || peek_char() == ')'
+                 || peek_char() == '\t'
+                 || peek_char() == '\v'
+                 || peek_char() == '\r'
+                 || peek_char() == '\n')
+                {
+                    text_range r(lex_start, pos);
+                    error_sink->push(error_tag(r, "expected '(' in raw string literal"));
+                    return make_unique<string_literal_token>(r, std::move(value));
+                }
+                else if (peek_char() == '(')
+                {
+                    advance_char();
+                    break;
+                }
+                else
+                {
+                    prefix += peek_char();
+                    advance_char();
+                }
+            }
+
+            for (;;)
+            {
+                if (eof_char())
+                {
+                    text_range r(lex_start, pos);
+                    error_sink->push(error_tag(r, "unterminated string"));
+                    return make_unique<string_literal_token>(r, std::move(value));
+                }
+                else if (is_raw_string_literal_end(prefix))
+                {
+                    // as raw-string-literal-end should begins with ')' and std::equals is short-circuited,
+                    // raw-string-literal should be lexed in linear time
+
+                    advance_char(2 + prefix.size());
+
+                    return make_unique<string_literal_token>(text_range(lex_start, pos), std::move(value));
+                }
+                else
+                {
+                    value += peek_char();
+                    advance_char();
+                }
+            }
+        }
         else if (is_identifier_start(peek_char()))
         {
             std::string s(1, peek_char());
@@ -338,4 +395,20 @@ bool lexer::is_multi_line_comment_end() const
         return false;
 
     return *pos == '*' && *(pos + 1) == '/';
+}
+
+bool lexer::is_raw_string_literal_start() const
+{
+    if ((end - pos) < 2)
+        return false;
+
+    return *pos == 'R' && *(pos + 1) == '"';
+}
+
+bool lexer::is_raw_string_literal_end(std::string const& prefix) const
+{
+    if (static_cast<size_t>(end - pos) < (2 + prefix.size()))
+        return false;
+
+    return *pos == ')' && std::equal(prefix.begin(), prefix.end(), pos + 1) && *(pos + 1 + prefix.size()) == '"';
 }
