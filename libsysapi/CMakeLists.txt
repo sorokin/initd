@@ -17,4 +17,6 @@ add_library(libsysapi
    loop_device.h
    current_directory.cpp
    current_directory.h
+   process.cpp
+   process.h
 )
