@@ -11,6 +11,7 @@
 #include "epoll.h"
 #include "signalfd.h"
 #include "function_queue.h"
+#include "block_signals.h"
 
 #include <signal.h>
 
