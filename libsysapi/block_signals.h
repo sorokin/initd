@@ -8,6 +8,7 @@
 namespace sysapi
 {
     sigset_t make_sigset(std::initializer_list<int> const&);
+    sigset_t make_sigset(int);
 
     struct block_signals
     {

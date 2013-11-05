@@ -4,6 +4,6 @@
 #include "task_handle_fwd.h"
 #include "null_task_data.h"
 
-task_handle_ptr create_null_task(null_task_data const&);
+task_handle_ptr create_task(null_task_data const&);
 
 #endif // NULL_TASK_H

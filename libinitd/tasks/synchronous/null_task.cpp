@@ -16,7 +16,7 @@ namespace
     };
 }
 
-task_handle_ptr create_null_task(null_task_data const&)
+task_handle_ptr create_task(null_task_data const&)
 {
     return make_unique<null_task_handle>();
 }

@@ -9,6 +9,10 @@ add_library(libsysapi
    epoll.h
    signalfd.cpp
    signalfd.h
+   block_signals.cpp
+   block_signals.h
+   sigchild_handler.cpp
+   sigchild_handler.h
    function_queue.cpp
    function_queue.h
    errors.cpp

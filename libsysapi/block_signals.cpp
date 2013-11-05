@@ -21,6 +21,16 @@ sigset_t sysapi::make_sigset(std::initializer_list<int> const& ss)
     return set;
 }
 
+sigset_t sysapi::make_sigset(int signo)
+{
+    sigset_t set;
+    sigemptyset(&set);
+
+    sigaddset(&set, signo);
+
+    return set;
+}
+
 block_signals::block_signals(const sigset_t& mask)
 {
     int r = ::sigprocmask(SIG_BLOCK, &mask, &oldset);

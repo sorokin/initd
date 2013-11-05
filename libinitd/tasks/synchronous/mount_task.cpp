@@ -247,7 +247,7 @@ namespace
     };
 }
 
-task_handle_ptr create_mount_task(mount_task_data const& data)
+task_handle_ptr create_task(mount_task_data const& data)
 {
     return make_unique<mount_task_handle>(data);
 }

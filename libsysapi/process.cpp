@@ -72,6 +72,26 @@ void sysapi::waitpid(pid_t pid)
     assert(wpid == pid);
 }
 
+pid_t sysapi::reap_child()
+{
+    int status;
+    pid_t wpid = ::waitpid(-1, &status, WNOHANG);
+    if (wpid < 0)
+    {
+        int err = errno;
+
+        if (err == ECHILD)
+            return -1;
+
+        std::stringstream ss;
+        ss << "unable to waitpid, error: " << sysapi::errno_to_text(err);
+
+        throw std::runtime_error(ss.str());
+    }
+
+    return wpid;
+}
+
 void sysapi::execv(std::string const& executable, std::vector<std::string> const& arguments)
 {
     std::vector<char*> v;

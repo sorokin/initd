@@ -1,5 +1,4 @@
-#include "task_handle.h"
-#include "initd_state.h"
+#include "initd_state2.h"
 
 #include "make_unique.h"
 
@@ -10,19 +9,10 @@
 
 #include "epoll.h"
 #include "signalfd.h"
-#include "function_queue.h"
 #include "block_signals.h"
+#include "sigchild_handler.h"
 
 #include <signal.h>
-
-void enqueue_work(sysapi::function_queue* fq, initd_state* state)
-{
-    if (state->has_pending_operations())
-        fq->push([=]() {
-            state->run_once();
-            enqueue_work(fq, state);
-        });
-}
 
 int main(int argc, char* argv[])
 {
@@ -43,12 +33,10 @@ int main(int argc, char* argv[])
             done = true;
         });
 
-        sysapi::function_queue fq(epoll);
+        sysapi::install_sigchild_handler install_sigchild_handler(epoll);
 
-        initd_state state(std::move(descriptions));
+        initd_state2 state(epoll, std::move(descriptions));
         state.set_run_level(rlevel);
-
-        enqueue_work(&fq, &state);
 
         while (!done)
             epoll.wait();
@@ -57,7 +45,7 @@ int main(int argc, char* argv[])
         state.set_run_level(run_level{});
 
         while (state.has_pending_operations())
-            state.run_once();
+            epoll.wait();
 
         std::cerr << "all tasks were shut down, terminating..." << std::endl;
     }

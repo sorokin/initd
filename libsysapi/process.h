@@ -13,6 +13,7 @@ namespace sysapi
     pid_t fork(std::function<void ()> const& child);
 
     void waitpid(pid_t);
+    pid_t reap_child();
 
     void execv(std::string const& executable, std::vector<std::string> const& arguments) __attribute__((noreturn));
 }
