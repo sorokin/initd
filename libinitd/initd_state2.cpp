@@ -5,6 +5,9 @@
 
 #include "make_unique.h"
 
+#include <sstream>
+#include <stdexcept>
+
 task2::task2(async_task_handle_sp handle)
     : handle(std::move(handle))
     , should_work(false)
@@ -68,6 +71,8 @@ initd_state2::initd_state2(sysapi::epoll& ep, task_descriptions descriptions)
     auto const& descrs = descriptions.get_all_tasks();
     tasks.resize(descrs.size());
 
+    std::map<task_description*, task2*> descr_to_task;
+
     for (size_t i = 0; i != descrs.size(); ++i)
     {
         tasks[i] = make_unique<task2>(create_async_task_handle(ep, [this, i]() {
@@ -97,13 +102,39 @@ initd_state2::initd_state2(sysapi::epoll& ep, task_descriptions descriptions)
             ++my_task->stopped_dependencies;
         }
     }
+
+    for (auto const& name_to_rl : descriptions.get_run_level_by_name())
+    {
+        std::vector<task2*> requisites;
+        for (task_description* req : name_to_rl.second.requisites)
+            requisites.push_back(descr_to_task.find(req)->second);
+        run_levels.insert(std::make_pair(name_to_rl.first, std::move(requisites)));
+    }
 }
 
-void initd_state2::set_run_level(run_level const& rlevel)
+void initd_state2::set_run_level(std::string const& run_level_name)
+{
+    auto i = run_levels.find(run_level_name);
+    if (i == run_levels.end())
+    {
+        std::stringstream ss;
+        ss << "run level \"" << run_level_name << "\" is not found";
+        throw std::runtime_error(ss.str());
+    }
+
+    clear_should_work_flag();
+    for (task2* d : i->second)
+        mark_should_work(*d);
+
+    for (task2_sp const& tp : tasks)
+        tp->sync(this);
+
+    enqueue_all();
+}
+
+void initd_state2::set_empty_run_level()
 {
     clear_should_work_flag();
-    for (task_description* d : rlevel.requisites)
-        mark_should_work(*descr_to_task.find(d)->second);
 
     for (task2_sp const& tp : tasks)
         tp->sync(this);

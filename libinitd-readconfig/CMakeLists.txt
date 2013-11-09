@@ -53,6 +53,9 @@ add_library(initd-readconfig
    parser/task_node.cpp
    parser/dependency_node.h
    parser/dependency_node.cpp
+   parser/run_level_node_fwd.h
+   parser/run_level_node.h
+   parser/run_level_node.cpp
    parser/top_level_node_fwd.h
    parser/top_level_node.h
    parser/top_level_node.cpp

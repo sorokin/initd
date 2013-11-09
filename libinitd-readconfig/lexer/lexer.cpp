@@ -46,6 +46,8 @@ namespace
             return make_unique<simple_token>(range, token_type::false_keyword);
         if (text == "depends")
             return make_unique<simple_token>(range, token_type::depends_keyword);
+        if (text == "run_level")
+            return make_unique<simple_token>(range, token_type::run_level_keyword);
 
         return make_unique<identifier_token>(range, std::move(text));
     }
@@ -337,6 +339,11 @@ token_sp lexer::read_next_token()
         {
             advance_char();
             return make_unique<simple_token>(text_range(lex_start, pos), token_type::comma);
+        }
+        else if (peek_char() == ':')
+        {
+            advance_char();
+            return make_unique<simple_token>(text_range(lex_start, pos), token_type::colon);
         }
         else
         {

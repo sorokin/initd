@@ -15,10 +15,12 @@ enum class token_type
     equals,
     semicolon,
     comma,
+    colon,
     task_keyword,
     true_keyword,
     false_keyword,
     depends_keyword,
+    run_level_keyword,
 };
 
 #endif

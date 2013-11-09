@@ -21,7 +21,6 @@ int main(int argc, char* argv[])
         std::string config_filename = argc >= 2 ? argv[1] : "default.initd.conf";
 
         task_descriptions descriptions = read_descriptions(config_filename, std::cerr);
-        run_level rlevel = run_level::all(descriptions);
 
         sysapi::epoll epoll;
 
@@ -36,13 +35,13 @@ int main(int argc, char* argv[])
         sysapi::install_sigchild_handler install_sigchild_handler(epoll);
 
         initd_state2 state(epoll, std::move(descriptions));
-        state.set_run_level(rlevel);
+        state.set_run_level("default");
 
         while (!done)
             epoll.wait();
 
         std::cerr << "setting empty run_level..." << std::endl;
-        state.set_run_level(run_level{});
+        state.set_empty_run_level();
 
         while (state.has_pending_operations())
             epoll.wait();

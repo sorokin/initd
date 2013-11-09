@@ -46,7 +46,8 @@ struct initd_state2
 {
     initd_state2(sysapi::epoll& ep, task_descriptions descriptions);
 
-    void set_run_level(run_level const& rlevel);
+    void set_run_level(std::string const& run_level_name);
+    void set_empty_run_level();
 
     bool has_pending_operations();
 
@@ -58,10 +59,10 @@ private:
     void enqueue_one(task2&);
 
 private:
-    sysapi::epoll&                      ep;
-    std::map<task_description*, task2*> descr_to_task;
-    std::vector<task2_sp>               tasks;
-    size_t                              pending_tasks;
+    sysapi::epoll&                              ep;
+    std::map<std::string, std::vector<task2*> > run_levels;
+    std::vector<task2_sp>                       tasks;
+    size_t                                      pending_tasks;
 
     friend struct task2;
 };

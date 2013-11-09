@@ -16,6 +16,7 @@
 #include "property_node.h"
 #include "task_node.h"
 #include "dependency_node.h"
+#include "run_level_node.h"
 #include "top_level_node.h"
 
 #include <cassert>
@@ -83,6 +84,13 @@ namespace
     };
 
     template <>
+    struct token_traits<token_type::colon>
+    {
+        typedef token type;
+        constexpr static char const* error_msg = "expected ':'";
+    };
+
+    template <>
     struct token_traits<token_type::task_keyword>
     {
         typedef token type;
@@ -108,6 +116,13 @@ namespace
     {
         typedef token type;
         constexpr static char const* error_msg = "expected 'depends' keyword";
+    };
+
+    template <>
+    struct token_traits<token_type::run_level_keyword>
+    {
+        typedef token type;
+        constexpr static char const* error_msg = "expected 'run_level' keyword";
     };
 
     struct parser_context : boost::noncopyable
@@ -183,6 +198,7 @@ namespace
         {
             std::vector<task_node_sp> tasks;
             std::vector<dependency_node_sp> dependencies_decls;
+            std::vector<run_level_node_sp> run_levels;
 
             for (;;)
             {
@@ -201,6 +217,10 @@ namespace
                 {
                     dependencies_decls.push_back(parse_dependencies_declaration());
                 }
+                else if (t == token_type::run_level_keyword)
+                {
+                    run_levels.push_back(parse_run_level());
+                }
                 else
                 {
                     error("expected declaration");
@@ -208,7 +228,9 @@ namespace
                 }
             }
 
-            return make_unique<top_level_node>(std::move(tasks), std::move(dependencies_decls));
+            return make_unique<top_level_node>(std::move(tasks),
+                                               std::move(dependencies_decls),
+                                               std::move(run_levels));
         }
 
         task_node_sp parse_task()
@@ -339,6 +361,40 @@ namespace
             expect_token<token_type::semicolon>();
 
             return make_unique<dependency_node>(std::move(name), std::move(dependencies));
+        }
+
+        run_level_node_sp parse_run_level()
+        {
+            token_sp            run_level_kw = assert_token<token_type::run_level_keyword>();
+            identifier_token_sp name         = expect_token<token_type::identifier>();
+            token_sp            colon        = expect_token<token_type::colon>();
+
+            std::vector<identifier_token_sp> dependencies;
+
+            for (;;)
+            {
+                identifier_token_sp id = expect_token<token_type::identifier>();
+                if (id)
+                    dependencies.push_back(std::move(id));
+
+                token_type t = tt();
+                if (t == token_type::eof)
+                    break;
+                else if (t == token_type::semicolon)
+                    break;
+                else if (t == token_type::comma)
+                    lex.read_token();
+                else
+                {
+                    if (!id)
+                        break;
+                    error("expected ',' or ';'");
+                }
+            }
+
+            expect_token<token_type::semicolon>();
+
+            return make_unique<run_level_node>(std::move(name), std::move(dependencies));
         }
 
     private:

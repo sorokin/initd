@@ -6,6 +6,7 @@
 #include "parser/top_level_node.h"
 #include "parser/task_node.h"
 #include "parser/value_node.h"
+#include "parser/run_level_node.h"
 #include "parser/parser.h"
 #include "line_map/line_map.h"
 #include "line_map/print_error.h"
@@ -19,7 +20,7 @@
 
 namespace
 {
-    std::multimap<std::string, task_description_sp> read_tasks(top_level_node const& node, error_tag_sink& esink)
+    void read_tasks(top_level_node const& node, error_tag_sink& esink, task_descriptions& res)
     {
         std::multimap<std::string, task_node*> tasks;
 
@@ -30,23 +31,39 @@ namespace
 
         report_duplicates(tasks, [&](task_node* node) { esink.push(error_tag(node->get_name().get_range(), "duplicate task definition")); });
 
-        std::multimap<std::string, task_description_sp> tasks2;
-
         for (auto const& p : tasks)
         {
             auto t = read_task(*p.second, esink);
             if (t)
-                tasks2.insert(std::make_pair(p.first, make_unique<task_description>(p.first, *t)));
+                res.create_task_description(p.first, *t);
             else
-                tasks2.insert(std::make_pair(p.first, make_unique<task_description>(p.first, null_task_data())));
+                res.create_task_description(p.first, null_task_data());
+        }
+    }
+
+    void resolve_task(identifier_token const& task_name_node,
+                      task_descriptions const& tds,
+                      error_tag_sink& esink,
+                      std::vector<task_description*>& res)
+    {
+        std::string task_name = task_name_node.get_text();
+
+        auto i = tds.get_task_by_name().find(task_name);
+        if (i == tds.get_task_by_name().end())
+        {
+            std::stringstream ss;
+            ss << "task \"" << task_name << "\" is not declared";
+
+            esink.push(error_tag(task_name_node.get_range(), ss.str()));
+            return;
         }
 
-        return tasks2;
+        res.push_back(i->second);
     }
 
     void read_dependecies(top_level_node const& node,
                           error_tag_sink& esink,
-                          std::multimap<std::string, task_description_sp>& tasks)
+                          task_descriptions& res)
     {
         for (dependency_node_sp const& dnode_sp : node.get_dependencies_decls())
         {
@@ -54,8 +71,8 @@ namespace
 
             std::string dependant = dnode.get_dependant().get_text();
 
-            auto dependant_i = tasks.find(dependant);
-            if (dependant_i == tasks.end())
+            auto dependant_i = res.get_task_by_name().find(dependant);
+            if (dependant_i == res.get_task_by_name().end())
             {
                 std::stringstream ss;
                 ss << "task \"" << dependant << "\" is not declared";
@@ -67,22 +84,31 @@ namespace
             std::vector<task_description*>& dependencies = dependant_i->second->get_dependencies();
 
             for (identifier_token_sp const& inode_sp : dnode.get_dependencies())
-            {
-                std::string dependency = inode_sp->get_text();
+                resolve_task(*inode_sp, res, esink, dependencies);
+        }
+    }
 
-                auto dependency_i = tasks.find(dependency);
-                if (dependency_i == tasks.end())
-                {
-                    std::stringstream ss;
-                    ss << "task \"" << dependency << "\" is not declared";
+    void read_run_levels(top_level_node const& node,
+                         error_tag_sink& esink,
+                         task_descriptions& res)
+    {
+        std::multimap<std::string, run_level_node*> run_levels;
 
-                    esink.push(error_tag(inode_sp->get_range(), ss.str()));
-                    continue;
-                }
+        for (run_level_node_sp const& rlnode_sp : node.get_run_levels())
+        {
+            run_levels.insert(std::make_pair(rlnode_sp->get_name().get_text(), rlnode_sp.get()));
+        }
 
-                dependencies.push_back(dependency_i->second.get());
-            }
+        report_duplicates(run_levels, [&](run_level_node* node) { esink.push(error_tag(node->get_name().get_range(), "duplicate run level definition")); });
 
+        for (auto const& p : run_levels)
+        {
+            std::vector<task_description*> requisites;
+
+            for (identifier_token_sp const& dnode_sp : p.second->get_dependencies())
+                resolve_task(*dnode_sp, res, esink, requisites);
+
+            res.create_run_level(p.first, std::move(requisites));
         }
     }
 }
@@ -96,13 +122,15 @@ task_descriptions read_descriptions(std::string const& config_filename, std::ost
     lexer lex{whole_file, esink};
     top_level_node_sp tree = parse_file(lex, esink);
 
-    line_map lmap{whole_file};
-
-    auto tasks = read_tasks(*tree, esink);
-    read_dependecies(*tree, esink, tasks);
+    task_descriptions tds;
+    read_tasks(*tree, esink, tds);
+    read_dependecies(*tree, esink, tds);
+    read_run_levels(*tree, esink, tds);
 
     if (!esink.get_errors().empty())
     {
+        line_map lmap{whole_file};
+
         for (error_tag const& e : esink.get_errors())
         {
             print_error(error_stream, config_filename, lmap, e);
@@ -110,11 +138,6 @@ task_descriptions read_descriptions(std::string const& config_filename, std::ost
 
         error_stream << std::endl;
     }
-
-    task_descriptions tds;
-
-    for (auto& t : tasks)
-        tds.insert_task_description(std::move(t.second));
 
     return tds;
 }
