@@ -127,12 +127,12 @@ epoll_registration::epoll_registration(epoll_registration&& rhs)
 {
     rhs.ep = nullptr;
     rhs.fd = -1;
+    rhs.callback = callback_t();
 }
 
 epoll_registration::~epoll_registration()
 {
-    if (ep)
-        ep->remove(fd);
+    clear();
 }
 
 epoll_registration& epoll_registration::operator=(epoll_registration rhs)
@@ -143,6 +143,17 @@ epoll_registration& epoll_registration::operator=(epoll_registration rhs)
 
 void epoll_registration::swap(epoll_registration& other)
 {
-    std::swap(ep, other.ep);
-    std::swap(fd, other.fd);
+    std::swap(ep,       other.ep);
+    std::swap(fd,       other.fd);
+    std::swap(callback, other.callback);
+}
+
+void epoll_registration::clear()
+{
+    if (ep)
+    {
+        ep->remove(fd);
+        ep = nullptr;
+        fd = -1;
+    }
 }

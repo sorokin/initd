@@ -46,6 +46,8 @@ namespace sysapi
 
         void swap(epoll_registration& other);
 
+        void clear();
+
     private:
         epoll* ep;
         int fd;
