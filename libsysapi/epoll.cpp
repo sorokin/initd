@@ -93,6 +93,24 @@ void epoll::add(int fd, uint32_t events, epoll_registration* reg)
     }
 }
 
+void epoll::modify(int fd, uint32_t events, epoll_registration* reg)
+{
+    epoll_event ev = {0};
+    ev.data.ptr = reg;
+    ev.events   = events;
+
+    int r = ::epoll_ctl(fd_.getfd(), EPOLL_CTL_MOD, fd, &ev);
+    if (r < 0)
+    {
+        int err = errno;
+
+        std::stringstream ss;
+        ss << "unable to modify file descriptor in epoll, error: " << sysapi::errno_to_text(err);
+
+        throw std::runtime_error(ss.str());
+    }
+}
+
 void epoll::remove(int fd)
 {
     int r = ::epoll_ctl(fd_.getfd(), EPOLL_CTL_DEL, fd, nullptr);
@@ -110,12 +128,14 @@ void epoll::remove(int fd)
 epoll_registration::epoll_registration()
     : ep()
     , fd(-1)
+    , events()
 {}
 
 epoll_registration::epoll_registration(epoll& ep, int fd, uint32_t events, callback_t callback)
     : ep(&ep)
     , fd(fd)
-    , callback(callback)
+    , events(events)
+    , callback(std::move(callback))
 {
     ep.add(fd, events, this);
 }
@@ -123,10 +143,13 @@ epoll_registration::epoll_registration(epoll& ep, int fd, uint32_t events, callb
 epoll_registration::epoll_registration(epoll_registration&& rhs)
     : ep(rhs.ep)
     , fd(rhs.fd)
+    , events(rhs.events)
     , callback(std::move(rhs.callback))
 {
+    update();
     rhs.ep = nullptr;
     rhs.fd = -1;
+    rhs.events = 0;
     rhs.callback = callback_t();
 }
 
@@ -145,7 +168,10 @@ void epoll_registration::swap(epoll_registration& other)
 {
     std::swap(ep,       other.ep);
     std::swap(fd,       other.fd);
+    std::swap(events,   other.events);
     std::swap(callback, other.callback);
+    update();
+    other.update();
 }
 
 void epoll_registration::clear()
@@ -155,5 +181,12 @@ void epoll_registration::clear()
         ep->remove(fd);
         ep = nullptr;
         fd = -1;
+        events = 0;
     }
+}
+
+void epoll_registration::update()
+{
+    if (ep)
+        ep->modify(fd, events, this);
 }

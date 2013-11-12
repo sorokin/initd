@@ -24,6 +24,7 @@ namespace sysapi
 
     private:
         void add(int fd, uint32_t events, epoll_registration*);
+        void modify(int fd, uint32_t events, epoll_registration*);
         void remove(int fd);
 
     private:
@@ -49,8 +50,12 @@ namespace sysapi
         void clear();
 
     private:
+        void update();
+
+    private:
         epoll* ep;
         int fd;
+        uint32_t events;
         callback_t callback;
 
         friend struct epoll;
