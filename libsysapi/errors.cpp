@@ -100,6 +100,8 @@ std::string sysapi::errno_to_name(int err)
     case ENOMSG:
         return "ENOMSG";
 
+    case ECONNREFUSED:
+        return "ECONNREFUSED";
 
 /*
 
