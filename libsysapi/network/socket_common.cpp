@@ -83,7 +83,7 @@ void sysapi::connect_socket(file_descriptor& fd, socket_address const& address)
             return;
 
         std::stringstream ss;
-        ss << "unable to connect, error: " << sysapi::errno_to_text(err);
+        ss << "unable to connect to \"" << address << "\", error: " << sysapi::errno_to_text(err);
 
         throw std::runtime_error(ss.str());
     }

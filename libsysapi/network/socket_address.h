@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 #include <string>
+#include <ostream>
 
 namespace sysapi
 {
@@ -21,6 +22,8 @@ namespace sysapi
     private:
         sockaddr_storage storage;
     };
+
+    std::ostream& operator<<(std::ostream& s, socket_address const& addr);
 }
 
 #endif

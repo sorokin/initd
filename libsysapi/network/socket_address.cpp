@@ -65,3 +65,17 @@ socket_address socket_address::unix_domain(std::string const& path)
 
     return r;
 }
+
+std::ostream& sysapi::operator<<(std::ostream& s, socket_address const& addr)
+{
+    switch (addr.get_address_family())
+    {
+    case AF_UNIX:
+        s << static_cast<sockaddr_un const*>(addr.get_data())->sun_path;
+        break;
+    default:
+        assert(false);
+        break;
+    }
+    return s;
+}
