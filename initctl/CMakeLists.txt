@@ -8,4 +8,4 @@ add_executable(initctl
    main.cpp
 )
 
-target_link_libraries(initctl libsysapi binstream)
+target_link_libraries(initctl sysapi binstream)

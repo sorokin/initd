@@ -10,8 +10,8 @@ include_directories("${LIBINITD_READCONFIG_SOURCE_DIR}")
 include_directories("${LIBSYSAPI_SOURCE_DIR}")
 include_directories("${Boost_INCLUDE_DIR}")
 
-add_executable(initd
+add_executable(init
    initd-main.cpp
 )
 
-target_link_libraries(initd libinitd initd-readconfig libinitd-config libsysapi ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(init initd initd-readconfig initd-config sysapi ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

@@ -4,7 +4,7 @@ project(LIBINITD_CONFIG)
 
 include_directories("${LIBINITD_COMMON_SOURCE_DIR}")
 
-add_library(libinitd-config
+add_library(initd-config
    null_task_data.h
    hostname_task_data.h
    mount_task_data.h
@@ -23,5 +23,3 @@ add_library(libinitd-config
    run_level.h
    run_level.cpp
 )
-
-target_link_libraries(libinitd-config)

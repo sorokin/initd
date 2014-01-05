@@ -12,4 +12,4 @@ add_executable(initd-config-test
    main.cpp
 )
 
-target_link_libraries(initd-config-test initd-readconfig libinitd-config libsysapi ${Boost_LIBRARIES})
+target_link_libraries(initd-config-test initd-readconfig initd-config sysapi ${Boost_LIBRARIES})

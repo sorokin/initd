@@ -4,7 +4,7 @@ project(LIBSYSAPI)
 
 include_directories("${LIBSYSAPI_SOURCE_DIR}")
 
-add_library(libsysapi
+add_library(sysapi
    file_descriptor.cpp
    file_descriptor.h
    epoll.cpp

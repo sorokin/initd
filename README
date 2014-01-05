@@ -14,8 +14,8 @@ Build:
 
 Run:
 
-~/d/initd/build$ cd initd
-~/d/initd/build/initd$ ./initd ../../demo.conf
+~/d/initd/build$ cd init
+~/d/initd/build/init$ ./init ../../demo.conf
 
 Press ^C to stop initd.
 

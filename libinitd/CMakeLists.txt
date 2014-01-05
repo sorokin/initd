@@ -8,7 +8,7 @@ include_directories("${LIBINITD_CONFIG_SOURCE_DIR}")
 include_directories("${LIBSYSAPI_SOURCE_DIR}")
 include_directories("${BINSTREAM_SOURCE_DIR}")
 
-add_library(libinitd
+add_library(initd
    initd_state.cpp
    initd_state.h
    task_context.h
@@ -35,4 +35,4 @@ add_library(libinitd
    tasks/synchronous/control_task.h
 )
 
-target_link_libraries(libinitd libsysapi binstream)
+target_link_libraries(initd sysapi binstream)
