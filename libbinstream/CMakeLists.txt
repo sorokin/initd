@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 
-project(BINSTREAM)
+project(LIBBINSTREAM)
 
 add_library(binstream
    binary_stream.cpp

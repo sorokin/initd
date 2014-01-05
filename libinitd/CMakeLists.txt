@@ -6,7 +6,7 @@ include_directories("${LIBINITD_SOURCE_DIR}"
 		    "${LIBINITD_COMMON_SOURCE_DIR}"
 		    "${LIBINITD_CONFIG_SOURCE_DIR}"
 		    "${LIBSYSAPI_SOURCE_DIR}"
-		    "${BINSTREAM_SOURCE_DIR}")
+		    "${LIBBINSTREAM_SOURCE_DIR}")
 
 add_library(initd
    initd_state.cpp

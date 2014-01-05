@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
+project(INIT)
+
 find_package(Boost 1.48)
 
 include_directories("${LIBINITD_SOURCE_DIR}"
