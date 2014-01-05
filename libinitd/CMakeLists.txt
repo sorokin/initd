@@ -2,11 +2,11 @@ cmake_minimum_required (VERSION 2.6)
 
 project(LIBINITD)
 
-include_directories("${LIBINITD_SOURCE_DIR}")
-include_directories("${LIBINITD_COMMON_SOURCE_DIR}")
-include_directories("${LIBINITD_CONFIG_SOURCE_DIR}")
-include_directories("${LIBSYSAPI_SOURCE_DIR}")
-include_directories("${BINSTREAM_SOURCE_DIR}")
+include_directories("${LIBINITD_SOURCE_DIR}"
+		    "${LIBINITD_COMMON_SOURCE_DIR}"
+		    "${LIBINITD_CONFIG_SOURCE_DIR}"
+		    "${LIBSYSAPI_SOURCE_DIR}"
+		    "${BINSTREAM_SOURCE_DIR}")
 
 add_library(initd
    initd_state.cpp
