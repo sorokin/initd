@@ -3,8 +3,11 @@
 
 #include "task_handle_fwd.h"
 #include "mount_task_data.h"
+#include "epoll.h"
 
-task_handle_ptr create_task(mount_task_data const&);
-task_handle_ptr create_loop_mount_task(mount_task_data const&);
+struct task_context;
+
+task_handle_ptr create_task(task_context& ctx, mount_task_data const&);
+task_handle_ptr create_loop_mount_task(task_context& ctx, mount_task_data const&);
 
 #endif // MOUNT_TASK_H

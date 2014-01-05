@@ -105,6 +105,16 @@ void dump(command const& data, std::ostream& out)
         << "    }\n";
 }
 
+void dump(control_task_data const& data, std::ostream& out)
+{
+    out << "control\n"
+        << "    {\n"
+        << "        uds_filename = ";
+    dump(data.uds_filename, out);
+    out << "\n"
+        << "    }\n";
+}
+
 void dump(start_stop_task_data const& data, std::ostream& out)
 {
     out << "start_stop\n"

@@ -96,7 +96,7 @@ namespace
     };
 }
 
-task_handle_ptr create_task(hostname_task_data const& data)
+task_handle_ptr create_task(task_context& ctx, hostname_task_data const& data)
 {
     return make_unique<hostname_task_handle>(data);
 }

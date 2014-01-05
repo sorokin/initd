@@ -10,8 +10,10 @@
 #include "run_level.h"
 
 #include "tasks/async_task_handle.h"
+#include "task_context.h"
 
 struct initd_state2;
+struct state_context;
 
 struct task2
 {
@@ -42,9 +44,9 @@ public:
 
 typedef std::unique_ptr<task2> task2_sp;
 
-struct initd_state2
+struct initd_state2 : private task_context
 {
-    initd_state2(sysapi::epoll& ep, task_descriptions descriptions);
+    initd_state2(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions);
 
     void set_run_level(std::string const& run_level_name);
     void set_empty_run_level();
@@ -59,6 +61,12 @@ private:
     void enqueue_one(task2&);
 
 private:
+    // task_context
+    sysapi::epoll& get_epoll();
+    state_context& get_state_context();
+
+private:
+    state_context&                              ctx;
     sysapi::epoll&                              ep;
     std::map<std::string, std::vector<task2*> > run_levels;
     std::vector<task2_sp>                       tasks;

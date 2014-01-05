@@ -7,6 +7,7 @@
 
 #include "task_data.h"
 #include "hostname_task_data.h"
+#include "control_task_data.h"
 #include "null_task_data.h"
 #include "read_value_node.h"
 #include "parser/task_node.h"
@@ -277,6 +278,48 @@ struct read_value_node_impl<start_stop_task_data>
 };
 
 template <>
+struct read_value_node_impl<control_task_data>
+{
+    static const char* get_type_name()
+    {
+        return "control";
+    }
+
+    static bool can_read(value_node const& node)
+    {
+        if (node.get_type() != value_node_type::struct_)
+            return false;
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        return cnode.get_tag().get_text() == get_type_name();
+    }
+
+    static boost::optional<control_task_data> read(value_node const& node, error_tag_sink& esink)
+    {
+        assert(node.get_type() == value_node_type::struct_);
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        assert(cnode.get_tag().get_text() == get_type_name());
+
+        std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+
+        control_task_data data;
+
+        boost::optional<std::string> uds_filename = extract_property_from_map<std::string>(cnode, properties_by_name, "uds_filename", esink);
+        if (!uds_filename)
+            return boost::none;
+        data.uds_filename = *uds_filename;
+
+        return data;
+    }
+
+    static boost::optional<control_task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
+    {
+        return boost::none;
+    }
+};
+
+template <>
 struct read_value_node_impl<null_task_data>
 {
     static const char* get_type_name()
@@ -323,6 +366,7 @@ struct read_value_node_impl<task_data>
     {
         return read_value_node_impl<hostname_task_data>::can_read(node)
             || read_value_node_impl<start_stop_task_data>::can_read(node)
+            || read_value_node_impl<control_task_data>::can_read(node)
             || read_value_node_impl<null_task_data>::can_read(node);
     }
 
@@ -332,6 +376,8 @@ struct read_value_node_impl<task_data>
             return optional_cast<task_data>(read_value_node<hostname_task_data>(node, esink));
         else if (can_read_value_node<start_stop_task_data>(node))
             return optional_cast<task_data>(read_value_node<start_stop_task_data>(node, esink));
+        else if (can_read_value_node<control_task_data>(node))
+            return optional_cast<task_data>(read_value_node<control_task_data>(node, esink));
         else if (can_read_value_node<null_task_data>(node))
             return optional_cast<task_data>(read_value_node<null_task_data>(node, esink));
         else

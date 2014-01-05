@@ -4,21 +4,23 @@
 #include <sstream>
 #include <iostream>
 
+#include "task_context.h"
 #include "synchronous/task_handle.h"
 
 #include "synchronous/hostname_task.h"
 #include "synchronous/mount_task.h"
+#include "synchronous/control_task.h"
 #include "synchronous/null_task.h"
 
 template <typename TaskData>
-sync_task_adaptor<TaskData>::sync_task_adaptor(sysapi::epoll& ep,
+sync_task_adaptor<TaskData>::sync_task_adaptor(task_context& ctx,
                                                current_state_changed_t current_state_changed,
                                                TaskData task_data)
-    : ep(ep)
+    : ctx(ctx)
     , current_state_changed(current_state_changed)
     , task_data(task_data)
     , running(false)
-    , fq(ep)
+    , fq(ctx.get_epoll())
 {}
 
 template <typename TaskData>
@@ -36,7 +38,7 @@ void sync_task_adaptor<TaskData>::set_should_work(bool s)
         {
             try
             {
-                handle = create_task(task_data);
+                handle = create_task(ctx, task_data);
             }
             catch (std::exception const& e)
             {
@@ -93,4 +95,5 @@ std::string sync_task_adaptor<TaskData>::status_message() const
 
 template struct sync_task_adaptor<hostname_task_data>;
 template struct sync_task_adaptor<mount_task_data>;
+template struct sync_task_adaptor<control_task_data>;
 template struct sync_task_adaptor<null_task_data>;

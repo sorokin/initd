@@ -3,6 +3,7 @@
 #include "tasks/create_async_task_handle.h"
 #include "task_description.h"
 
+#include "state_context.h"
 #include "make_unique.h"
 
 #include <sstream>
@@ -64,8 +65,9 @@ void task2::increment_counter_in_dependants(std::ptrdiff_t delta)
         dep->stopped_dependencies += delta;
 }
 
-initd_state2::initd_state2(sysapi::epoll& ep, task_descriptions descriptions)
-    : ep(ep)
+initd_state2::initd_state2(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions)
+    : ctx(ctx)
+    , ep(ep)
     , pending_tasks(0)
 {
     auto const& descrs = descriptions.get_all_tasks();
@@ -75,7 +77,7 @@ initd_state2::initd_state2(sysapi::epoll& ep, task_descriptions descriptions)
 
     for (size_t i = 0; i != descrs.size(); ++i)
     {
-        tasks[i] = make_unique<task2>(create_async_task_handle(ep, [this, i]() {
+        tasks[i] = make_unique<task2>(create_async_task_handle(*this, [this, i]() {
             tasks[i]->sync(this);
 
             if (tasks[i]->handle->is_running())
@@ -183,4 +185,14 @@ void initd_state2::enqueue_one(task2& t)
 
     if (t.handle->is_running() && !t.should_work && t.are_dependants_stopped())
         t.handle->set_should_work(false);
+}
+
+sysapi::epoll& initd_state2::get_epoll()
+{
+    return ep;
+}
+
+state_context& initd_state2::get_state_context()
+{
+    return ctx;
 }

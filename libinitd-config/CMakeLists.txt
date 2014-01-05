@@ -10,6 +10,7 @@ add_library(libinitd-config
    mount_task_data.h
    mount_options.cpp
    mount_options.h
+   control_task_data.h
    start_stop_task_data.h
    start_stop_task_data.cpp
    task_data.h

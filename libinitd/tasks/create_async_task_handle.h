@@ -8,7 +8,9 @@
 
 #include "epoll.h"
 
-async_task_handle_sp create_async_task_handle(sysapi::epoll&, std::function<void ()> state_changed, task_data const&);
+struct task_context;
+
+async_task_handle_sp create_async_task_handle(task_context&, std::function<void ()> state_changed, task_data const&);
 
 #endif
 

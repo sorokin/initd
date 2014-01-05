@@ -247,12 +247,12 @@ namespace
     };
 }
 
-task_handle_ptr create_task(mount_task_data const& data)
+task_handle_ptr create_task(task_context& ctx, mount_task_data const& data)
 {
     return make_unique<mount_task_handle>(data);
 }
 
-task_handle_ptr create_loop_mount_task(mount_task_data const& data)
+task_handle_ptr create_loop_mount_task(task_context& ctx, mount_task_data const& data)
 {
     return make_unique<loop_mount_task_handle>(data);
 }

@@ -9,11 +9,13 @@
 #include "epoll.h"
 #include "sigchild_handler.h"
 
+struct task_context;
+
 struct async_start_stop_task : async_task_handle
 {
     typedef std::function<void ()> current_state_changed_t;
 
-    async_start_stop_task(sysapi::epoll& ep,
+    async_start_stop_task(task_context& ctx,
                           current_state_changed_t current_state_changed,
                           start_stop_task_data task_data);
     ~async_start_stop_task();

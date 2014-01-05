@@ -6,10 +6,13 @@ include_directories("${LIBINITD_SOURCE_DIR}")
 include_directories("${LIBINITD_COMMON_SOURCE_DIR}")
 include_directories("${LIBINITD_CONFIG_SOURCE_DIR}")
 include_directories("${LIBSYSAPI_SOURCE_DIR}")
+include_directories("${BINSTREAM_SOURCE_DIR}")
 
 add_library(libinitd
    initd_state2.cpp
    initd_state2.h
+   task_context.h
+   state_context.h
    tasks/async_task_handle.cpp
    tasks/async_task_handle.h
    tasks/async_task_handle_fwd.h
@@ -28,6 +31,8 @@ add_library(libinitd
    tasks/synchronous/hostname_task.h
    tasks/synchronous/mount_task.cpp
    tasks/synchronous/mount_task.h
+   tasks/synchronous/control_task.cpp
+   tasks/synchronous/control_task.h
 )
 
-target_link_libraries(libinitd libsysapi)
+target_link_libraries(libinitd libsysapi binstream)

@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project(LIBSYSAPI)
 
+include_directories("${LIBSYSAPI_SOURCE_DIR}")
+
 add_library(libsysapi
    file_descriptor.cpp
    file_descriptor.h
@@ -23,4 +25,14 @@ add_library(libsysapi
    current_directory.h
    process.cpp
    process.h
+   reboot.cpp
+   reboot.h
+   network/socket_address.cpp
+   network/socket_address.h
+   network/stream_server_socket.cpp
+   network/stream_server_socket.h
+   network/stream_socket.cpp
+   network/stream_socket.h
+   network/socket_common.cpp
+   network/socket_common.h
 )

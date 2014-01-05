@@ -7,12 +7,14 @@
 #include "epoll.h"
 #include "function_queue.h"
 
+struct task_context;
+
 template <typename TaskData>
 struct sync_task_adaptor : async_task_handle
 {
     typedef std::function<void ()> current_state_changed_t;
 
-    sync_task_adaptor(sysapi::epoll& ep,
+    sync_task_adaptor(task_context& ctx,
                       current_state_changed_t current_state_changed,
                       TaskData task_data);
     ~sync_task_adaptor();
@@ -26,7 +28,7 @@ struct sync_task_adaptor : async_task_handle
     std::string status_message() const;
 
 private:
-    sysapi::epoll& ep;
+    task_context& ctx;
     current_state_changed_t current_state_changed;
     TaskData task_data;
     bool running;

@@ -2,11 +2,12 @@
 
 #include "process.h"
 #include "current_directory.h"
+#include "task_context.h"
 
-async_start_stop_task::async_start_stop_task(sysapi::epoll& ep,
+async_start_stop_task::async_start_stop_task(task_context& ctx,
                                              current_state_changed_t current_state_changed,
                                              start_stop_task_data task_data)
-    : ep(ep)
+    : ep(ctx.get_epoll())
     , current_state_changed(current_state_changed)
     , task_data(std::move(task_data))
     , running(false)
