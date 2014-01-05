@@ -1,4 +1,4 @@
-#include "initd_state2.h"
+#include "initd_state.h"
 
 #include "tasks/create_async_task_handle.h"
 #include "task_description.h"
@@ -29,7 +29,7 @@ bool task2::are_dependants_stopped() const
     return running_dependants == 0;
 }
 
-void task2::sync(initd_state2* istate)
+void task2::sync(initd_state* istate)
 {
     bool affect_dependencies = handle->is_running() || handle->is_in_transition();
     if (affect_dependencies != counted_in_dependencies)
@@ -65,7 +65,7 @@ void task2::increment_counter_in_dependants(std::ptrdiff_t delta)
         dep->stopped_dependencies += delta;
 }
 
-initd_state2::initd_state2(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions)
+initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions)
     : ctx(ctx)
     , ep(ep)
     , pending_tasks(0)
@@ -114,7 +114,7 @@ initd_state2::initd_state2(state_context& ctx, sysapi::epoll& ep, task_descripti
     }
 }
 
-void initd_state2::set_run_level(std::string const& run_level_name)
+void initd_state::set_run_level(std::string const& run_level_name)
 {
     auto i = run_levels.find(run_level_name);
     if (i == run_levels.end())
@@ -134,7 +134,7 @@ void initd_state2::set_run_level(std::string const& run_level_name)
     enqueue_all();
 }
 
-void initd_state2::set_empty_run_level()
+void initd_state::set_empty_run_level()
 {
     clear_should_work_flag();
 
@@ -144,18 +144,18 @@ void initd_state2::set_empty_run_level()
     enqueue_all();
 }
 
-bool initd_state2::has_pending_operations()
+bool initd_state::has_pending_operations()
 {
     return pending_tasks != 0;
 }
 
-void initd_state2::clear_should_work_flag()
+void initd_state::clear_should_work_flag()
 {
     for (task2_sp const& tp : tasks)
         tp->should_work = false;
 }
 
-void initd_state2::mark_should_work(task2& t)
+void initd_state::mark_should_work(task2& t)
 {
     bool old = t.should_work;
 
@@ -166,19 +166,19 @@ void initd_state2::mark_should_work(task2& t)
             mark_should_work(*dep);
 }
 
-void initd_state2::enqueue_all()
+void initd_state::enqueue_all()
 {
     for (task2_sp const& tp : tasks)
         enqueue_one(*tp);
 }
 
-void initd_state2::enqueue_all(std::vector<task2*> const& tts)
+void initd_state::enqueue_all(std::vector<task2*> const& tts)
 {
     for (task2* t : tts)
         enqueue_one(*t);
 }
 
-void initd_state2::enqueue_one(task2& t)
+void initd_state::enqueue_one(task2& t)
 {
     if (!t.handle->is_running() && t.should_work && t.are_dependencies_running())
         t.handle->set_should_work(true);
@@ -187,12 +187,12 @@ void initd_state2::enqueue_one(task2& t)
         t.handle->set_should_work(false);
 }
 
-sysapi::epoll& initd_state2::get_epoll()
+sysapi::epoll& initd_state::get_epoll()
 {
     return ep;
 }
 
-state_context& initd_state2::get_state_context()
+state_context& initd_state::get_state_context()
 {
     return ctx;
 }

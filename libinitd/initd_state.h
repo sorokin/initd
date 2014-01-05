@@ -12,7 +12,7 @@
 #include "tasks/async_task_handle.h"
 #include "task_context.h"
 
-struct initd_state2;
+struct initd_state;
 struct state_context;
 
 struct task2
@@ -27,7 +27,7 @@ struct task2
     std::vector<task2*>  dependants;
     bool                 should_work;
 
-    void sync(initd_state2* istate);
+    void sync(initd_state* istate);
 
 private:
     void increment_counter_in_dependencies(std::ptrdiff_t);
@@ -44,9 +44,9 @@ public:
 
 typedef std::unique_ptr<task2> task2_sp;
 
-struct initd_state2 : private task_context
+struct initd_state : private task_context
 {
-    initd_state2(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions);
+    initd_state(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions);
 
     void set_run_level(std::string const& run_level_name);
     void set_empty_run_level();

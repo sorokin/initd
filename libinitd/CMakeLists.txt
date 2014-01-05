@@ -9,8 +9,8 @@ include_directories("${LIBSYSAPI_SOURCE_DIR}")
 include_directories("${BINSTREAM_SOURCE_DIR}")
 
 add_library(libinitd
-   initd_state2.cpp
-   initd_state2.h
+   initd_state.cpp
+   initd_state.h
    task_context.h
    state_context.h
    tasks/async_task_handle.cpp

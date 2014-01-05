@@ -1,4 +1,4 @@
-#include "initd_state2.h"
+#include "initd_state.h"
 #include "state_context.h"
 
 #include "make_unique.h"
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
         sysapi::install_sigchild_handler install_sigchild_handler(epoll);
 
-        initd_state2 state(ctx, epoll, std::move(descriptions));
+        initd_state state(ctx, epoll, std::move(descriptions));
         state.set_run_level("default");
 
         while (ctx.get_state() == context::state::running)
