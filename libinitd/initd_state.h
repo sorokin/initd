@@ -15,16 +15,16 @@
 struct initd_state;
 struct state_context;
 
-struct task2
+struct task
 {
-    task2(async_task_handle_sp handle);
+    task(async_task_handle_sp handle);
 
     bool are_dependencies_running() const;
     bool are_dependants_stopped() const;
 
     async_task_handle_sp handle;
-    std::vector<task2*>  dependencies;
-    std::vector<task2*>  dependants;
+    std::vector<task*>  dependencies;
+    std::vector<task*>  dependants;
     bool                 should_work;
 
     void sync(initd_state* istate);
@@ -42,7 +42,7 @@ public:
     bool                 counted_in_pending_tasks;
 };
 
-typedef std::unique_ptr<task2> task2_sp;
+typedef std::unique_ptr<task> task2_sp;
 
 struct initd_state : private task_context
 {
@@ -55,10 +55,10 @@ struct initd_state : private task_context
 
 private:
     void clear_should_work_flag();
-    void mark_should_work(task2&);
+    void mark_should_work(task&);
     void enqueue_all();
-    void enqueue_all(std::vector<task2*> const&);
-    void enqueue_one(task2&);
+    void enqueue_all(std::vector<task*> const&);
+    void enqueue_one(task&);
 
 private:
     // task_context
@@ -68,11 +68,11 @@ private:
 private:
     state_context&                              ctx;
     sysapi::epoll&                              ep;
-    std::map<std::string, std::vector<task2*> > run_levels;
+    std::map<std::string, std::vector<task*> > run_levels;
     std::vector<task2_sp>                       tasks;
     size_t                                      pending_tasks;
 
-    friend struct task2;
+    friend struct task;
 };
 
 #endif

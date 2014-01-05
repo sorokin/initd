@@ -9,7 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 
-task2::task2(async_task_handle_sp handle)
+task::task(async_task_handle_sp handle)
     : handle(std::move(handle))
     , should_work(false)
     , stopped_dependencies(0)
@@ -19,17 +19,17 @@ task2::task2(async_task_handle_sp handle)
     , counted_in_pending_tasks(false)
 {}
 
-bool task2::are_dependencies_running() const
+bool task::are_dependencies_running() const
 {
     return stopped_dependencies == 0;
 }
 
-bool task2::are_dependants_stopped() const
+bool task::are_dependants_stopped() const
 {
     return running_dependants == 0;
 }
 
-void task2::sync(initd_state* istate)
+void task::sync(initd_state* istate)
 {
     bool affect_dependencies = handle->is_running() || handle->is_in_transition();
     if (affect_dependencies != counted_in_dependencies)
@@ -53,15 +53,15 @@ void task2::sync(initd_state* istate)
     }
 }
 
-void task2::increment_counter_in_dependencies(std::ptrdiff_t delta)
+void task::increment_counter_in_dependencies(std::ptrdiff_t delta)
 {
-    for (task2* dep : dependencies)
+    for (task* dep : dependencies)
         dep->running_dependants += delta;
 }
 
-void task2::increment_counter_in_dependants(std::ptrdiff_t delta)
+void task::increment_counter_in_dependants(std::ptrdiff_t delta)
 {
-    for (task2* dep : dependants)
+    for (task* dep : dependants)
         dep->stopped_dependencies += delta;
 }
 
@@ -73,11 +73,11 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
     auto const& descrs = descriptions.get_all_tasks();
     tasks.resize(descrs.size());
 
-    std::map<task_description*, task2*> descr_to_task;
+    std::map<task_description*, task*> descr_to_task;
 
     for (size_t i = 0; i != descrs.size(); ++i)
     {
-        tasks[i] = make_unique<task2>(create_async_task_handle(*this, [this, i]() {
+        tasks[i] = make_unique<task>(create_async_task_handle(*this, [this, i]() {
             tasks[i]->sync(this);
 
             if (tasks[i]->handle->is_running())
@@ -93,11 +93,11 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
     for (size_t i = 0; i != descrs.size(); ++i)
     {
         task_description* descr = descrs[i].get();
-        task2* my_task = tasks[i].get();
+        task* my_task = tasks[i].get();
 
         for (task_description* dep : descr->get_dependencies())
         {
-            task2* dep_task = descr_to_task.find(dep)->second;
+            task* dep_task = descr_to_task.find(dep)->second;
             my_task->dependencies.push_back(dep_task);
             dep_task->dependants.push_back(my_task);
 
@@ -107,7 +107,7 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
 
     for (auto const& name_to_rl : descriptions.get_run_level_by_name())
     {
-        std::vector<task2*> requisites;
+        std::vector<task*> requisites;
         for (task_description* req : name_to_rl.second.requisites)
             requisites.push_back(descr_to_task.find(req)->second);
         run_levels.insert(std::make_pair(name_to_rl.first, std::move(requisites)));
@@ -125,7 +125,7 @@ void initd_state::set_run_level(std::string const& run_level_name)
     }
 
     clear_should_work_flag();
-    for (task2* d : i->second)
+    for (task* d : i->second)
         mark_should_work(*d);
 
     for (task2_sp const& tp : tasks)
@@ -155,14 +155,14 @@ void initd_state::clear_should_work_flag()
         tp->should_work = false;
 }
 
-void initd_state::mark_should_work(task2& t)
+void initd_state::mark_should_work(task& t)
 {
     bool old = t.should_work;
 
     t.should_work = true;
 
     if (!old)
-        for (task2* dep : t.dependencies)
+        for (task* dep : t.dependencies)
             mark_should_work(*dep);
 }
 
@@ -172,13 +172,13 @@ void initd_state::enqueue_all()
         enqueue_one(*tp);
 }
 
-void initd_state::enqueue_all(std::vector<task2*> const& tts)
+void initd_state::enqueue_all(std::vector<task*> const& tts)
 {
-    for (task2* t : tts)
+    for (task* t : tts)
         enqueue_one(*t);
 }
 
-void initd_state::enqueue_one(task2& t)
+void initd_state::enqueue_one(task& t)
 {
     if (!t.handle->is_running() && t.should_work && t.are_dependencies_running())
         t.handle->set_should_work(true);
