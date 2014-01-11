@@ -34,13 +34,13 @@ typename boost::enable_if_c<std::is_trivial<T>::value, void>::type write(binary_
     s.write(&value, sizeof value);
 }
 
-template<typename Char, typename Traits, typename Allocator>
+template <typename Char, typename Traits, typename Allocator>
 size_t measure(std::basic_string<Char, Traits, Allocator> const& value)
 {
     return sizeof(uint32_t) + sizeof(Char) * value.size();
 }
 
-template<typename Char, typename Traits, typename Allocator>
+template <typename Char, typename Traits, typename Allocator>
 void write(binary_output_stream& s, std::basic_string<Char, Traits, Allocator> const& value)
 {
     uint32_t size32 = (uint32_t)value.size();
@@ -73,7 +73,7 @@ typename boost::enable_if_c<std::is_trivial<T>::value, void>::type read(binary_i
     s.read(&value, sizeof value);
 }
 
-template<typename Char, typename Traits, typename Allocator>
+template <typename Char, typename Traits, typename Allocator>
 void read(binary_input_stream& s, std::basic_string<Char, Traits, Allocator>& value)
 {
     uint32_t size32;
