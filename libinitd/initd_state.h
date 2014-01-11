@@ -51,7 +51,7 @@ struct initd_state : private task_context
     void set_run_level(std::string const& run_level_name);
     void set_empty_run_level();
 
-    bool has_pending_operations();
+    bool has_pending_operations() const;
 
 private:
     void clear_should_work_flag();

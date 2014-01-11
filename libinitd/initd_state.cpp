@@ -144,7 +144,7 @@ void initd_state::set_empty_run_level()
     enqueue_all();
 }
 
-bool initd_state::has_pending_operations()
+bool initd_state::has_pending_operations() const
 {
     return pending_tasks != 0;
 }
