@@ -76,6 +76,9 @@ pid_t sysapi::reap_child()
 {
     int status;
     pid_t wpid = ::waitpid(-1, &status, WNOHANG);
+    if (wpid == 0)
+        return -1;
+
     if (wpid < 0)
     {
         int err = errno;
