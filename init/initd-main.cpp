@@ -22,85 +22,103 @@ namespace
 {
     struct context : state_context
     {
-        enum class state
+        enum class target
         {
             running,
             reboot,
             power_off,
         };
 
-        context();
+        context(task_descriptions descriptions);
+
+        bool is_active() const;
 
         void reboot();
         void power_off();
+        void set_runlevel(std::string const&);
 
-        state get_state() const;
+        target get_target() const;
+        sysapi::epoll& get_epoll();
+        initd_state& get_state();
 
     private:
-        state st;
+        target tg;
+        sysapi::epoll epoll;
+        sysapi::block_signals block_signals;
+        sysapi::signalfd sfd;
+        sysapi::install_sigchild_handler install_sigchild_handler;
+        initd_state state;
     };
 
-    context::context()
-        : st(state::running)
-    {}
+    const sigset_t sig_mask = sysapi::make_sigset({SIGINT, SIGTERM});
+
+    context::context(task_descriptions descriptions)
+        : tg(target::running)
+        , block_signals(sig_mask)
+        , sfd(epoll, sig_mask, [this](signalfd_siginfo const& info) {
+            reboot();
+        })
+        , install_sigchild_handler(epoll)
+        , state(*this, epoll, std::move(descriptions))
+    {
+        state.set_run_level("default");
+    }
+
+    bool context::is_active() const
+    {
+        return tg == target::running || state.has_pending_operations();
+    }
 
     void context::reboot()
     {
-        st = state::reboot;
+        tg = target::reboot;
+        state.set_empty_run_level();
     }
 
     void context::power_off()
     {
-        st = state::power_off;
+        tg = target::power_off;
+        state.set_empty_run_level();
     }
 
-    context::state context::get_state() const
+    void context::set_runlevel(std::string const& runlevel_name)
     {
-        return st;
+        std::cerr << "setting runlevel: " << runlevel_name << std::endl;
+        tg = target::running;
+        state.set_run_level(runlevel_name);
+    }
+
+    context::target context::get_target() const
+    {
+        return tg;
+    }
+
+    sysapi::epoll& context::get_epoll()
+    {
+        return epoll;
     }
 }
 
 int main(int argc, char* argv[])
 {
-    context::state exit_state;
+    context::target exit_state;
 
     try
     {
         std::string config_filename = argc >= 2 ? argv[1] : "default.initd.conf";
 
-        task_descriptions descriptions = read_descriptions(config_filename, std::cerr);
+        context ctx(read_descriptions(config_filename, std::cerr));
 
-        sysapi::epoll epoll;
+        while (ctx.is_active())
+            ctx.get_epoll().wait();
 
-        context ctx;
-
-        sigset_t mask = sysapi::make_sigset({SIGINT, SIGTERM});
-        sysapi::block_signals block_signals(mask);
-        sysapi::signalfd sfd(epoll, mask, [&ctx](signalfd_siginfo const& info) {
-            ctx.reboot();
-        });
-
-        sysapi::install_sigchild_handler install_sigchild_handler(epoll);
-
-        initd_state state(ctx, epoll, std::move(descriptions));
-        state.set_run_level("default");
-
-        while (ctx.get_state() == context::state::running)
-            epoll.wait();
-
-        std::cerr << "setting empty run_level..." << std::endl;
-        state.set_empty_run_level();
-
-        while (state.has_pending_operations())
-            epoll.wait();
-
-        exit_state = ctx.get_state();
+        exit_state = ctx.get_target();
         std::cerr << "all tasks were shut down, terminating..." << std::endl;
     }
     catch (std::exception const& e)
     {
         std::cerr << "error: " << e.what() << std::endl;
-        exit_state = context::state::reboot;
+        exit_state = context::target::reboot;
     }
 
     if (getpid() == 1)
@@ -109,16 +127,16 @@ int main(int argc, char* argv[])
         {
             switch (exit_state)
             {
-            case context::state::running:
+            case context::target::running:
                 assert(false);
                 break;
-            case context::state::reboot:
+            case context::target::reboot:
                 std::cout << "syncing drives..." << std::endl;
                 sync();
                 std::cout << "reboot..." << std::endl;
                 sysapi::reboot();
                 break;
-            case context::state::power_off:
+            case context::target::power_off:
                 std::cout << "syncing drives..." << std::endl;
                 sync();
                 std::cout << "power off..." << std::endl;

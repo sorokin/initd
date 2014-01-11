@@ -68,6 +68,13 @@ namespace
                         s.expect_eof();
                         this->ctx.get_state_context().power_off();
                     }
+                    else if (msg_id == set_runlevel_msg::msg_id)
+                    {
+                        set_runlevel_msg msg;
+                        read(s, msg);
+                        s.expect_eof();
+                        this->ctx.get_state_context().set_runlevel(msg.runlevel_name);
+                    }
                     else
                     {
                         std::stringstream ss;

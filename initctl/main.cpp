@@ -12,9 +12,17 @@
 
 int main(int argc, char const* argv[])
 {
-    if (argc != 2)
+    if (argc < 2)
     {
-        std::cerr << "usage: " << argv[0] << " [reboot|shutdown]" << std::endl;
+        std::cerr << argv[0] << " reboot\n";
+        std::cerr << "    reboot computer\n";
+        std::cerr << "\n";
+        std::cerr << argv[0] << " poweroff\n";
+        std::cerr << "    turn computer off\n";
+        std::cerr << "\n";
+        std::cerr << argv[0] << " runlevel <runlevel name>\n";
+        std::cerr << "    set current runlevel\n";
+        std::cerr << "\n";
         return EXIT_FAILURE;
     }
 
@@ -32,6 +40,13 @@ int main(int argc, char const* argv[])
             serialize(stream, reboot_msg());
         else if (action == "poweroff")
             serialize(stream, power_off_msg());
+        else if (action == "runlevel")
+        {
+            if (argc < 3)
+                throw std::runtime_error("expected runlevel name");
+
+            serialize(stream, set_runlevel_msg(argv[2]));
+        }
         else
         {
             std::stringstream ss;
