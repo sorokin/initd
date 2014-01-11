@@ -17,7 +17,7 @@ struct power_off_msg
 template <typename T>
 void serialize(binary_output_stream& s, T const& value)
 {
-    uint32_t size = sizeof value;
+    uint32_t size = measure(value);
     write(s, size);
     write(s, T::msg_id);
     write(s, value);
