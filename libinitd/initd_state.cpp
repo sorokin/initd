@@ -180,10 +180,12 @@ void initd_state::enqueue_all(std::vector<task*> const& tts)
 
 void initd_state::enqueue_one(task& t)
 {
-    if (!t.handle->is_running() && t.should_work && t.are_dependencies_running())
+    if ((!t.handle->is_running() || t.handle->is_in_transition())
+        && t.should_work && t.are_dependencies_running())
         t.handle->set_should_work(true);
 
-    if (t.handle->is_running() && !t.should_work && t.are_dependants_stopped())
+    if ((t.handle->is_running() || t.handle->is_in_transition())
+        && !t.should_work && t.are_dependants_stopped())
         t.handle->set_should_work(false);
 }
 
