@@ -15,9 +15,6 @@ struct task
     std::vector<task*> const& get_dependencies() const;
     std::vector<task*> const& get_dependants() const;
 
-    bool are_dependencies_running() const;
-    bool are_dependants_stopped() const;
-
     void clear_should_work();
     void mark_should_work();
     void enqueue_this();
@@ -27,6 +24,9 @@ struct task
     friend void add_task_dependency(task& dependant, task& dependency);
 
 private:
+    bool are_dependencies_running() const;
+    bool are_dependants_stopped() const;
+
     void increment_counter_in_dependencies(std::ptrdiff_t);
     void increment_counter_in_dependants(std::ptrdiff_t);
 

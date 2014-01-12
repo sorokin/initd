@@ -39,16 +39,6 @@ std::vector<task*> const& task::get_dependants() const
     return dependants;
 }
 
-bool task::are_dependencies_running() const
-{
-    return stopped_dependencies == 0;
-}
-
-bool task::are_dependants_stopped() const
-{
-    return running_dependants == 0;
-}
-
 void task::clear_should_work()
 {
     should_work = false;
@@ -98,6 +88,16 @@ void task::sync(initd_state* istate)
         istate->pending_tasks += (affect_pending_tasks ? 1 : -1);
         counted_in_pending_tasks = affect_pending_tasks;
     }
+}
+
+bool task::are_dependencies_running() const
+{
+    return stopped_dependencies == 0;
+}
+
+bool task::are_dependants_stopped() const
+{
+    return running_dependants == 0;
 }
 
 void task::increment_counter_in_dependencies(std::ptrdiff_t delta)
