@@ -25,10 +25,10 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
         tasks[i] = make_unique<task>(create_async_task_handle(*this, [this, i]() {
             tasks[i]->sync(this);
 
-            if (tasks[i]->handle->is_running())
-                enqueue_all(tasks[i]->dependants);
+            if (tasks[i]->get_handle()->is_running())
+                enqueue_all(tasks[i]->get_dependants());
             else
-                enqueue_all(tasks[i]->dependencies);
+                enqueue_all(tasks[i]->get_dependencies());
 
         }, descrs[i]->get_data()));
 
@@ -97,7 +97,7 @@ bool initd_state::has_pending_operations() const
 void initd_state::clear_should_work_flag()
 {
     for (task_sp const& tp : tasks)
-        tp->should_work = false;
+        tp->clear_should_work();
 }
 
 void initd_state::enqueue_all()
