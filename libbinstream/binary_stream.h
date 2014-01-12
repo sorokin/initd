@@ -51,6 +51,30 @@ void write(binary_output_stream& s, std::basic_string<Char, Traits, Allocator> c
     s.write(value.data(), sizeof(Char) * value.size());
 }
 
+template <typename Element, typename Allocator>
+size_t measure(std::vector<Element, Allocator> const& value)
+{
+    size_t r = sizeof(uint32_t);
+
+    for (size_t i = 0; i != value.size(); ++i)
+        r += measure(value[i]);
+
+    return r;
+}
+
+template <typename Element, typename Allocator>
+void write(binary_output_stream& s, std::vector<Element, Allocator> const& value)
+{
+    uint32_t size32 = (uint32_t)value.size();
+    if (size32 != value.size())
+        throw std::runtime_error("too large string to serialize");
+
+    write(s, size32);
+
+    for (size_t i = 0; i != value.size(); ++i)
+        write(s, value[i]);
+}
+
 struct binary_input_stream
 {
     binary_input_stream(void const* data, size_t size);
@@ -84,6 +108,21 @@ void read(binary_input_stream& s, std::basic_string<Char, Traits, Allocator>& va
     s.read(tmp.data(), sizeof(Char) * size32);
 
     value.assign(tmp.begin(), tmp.end());
+}
+
+template <typename Element, typename Allocator>
+void read(binary_input_stream& s, std::vector<Element, Allocator> const& value)
+{
+    uint32_t size32;
+    read(s, size32);
+
+    std::vector<Element, Allocator> tmp;
+    tmp.resize(size32);
+
+    for (size_t i = 0; i != size32; ++i)
+        read(s, tmp[i]);
+
+    std::swap(tmp, value);
 }
 
 #endif
