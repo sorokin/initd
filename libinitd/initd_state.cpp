@@ -23,12 +23,13 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
     for (size_t i = 0; i != descrs.size(); ++i)
     {
         tasks[i] = make_unique<task>(create_async_task_handle(*this, [this, i]() {
-            tasks[i]->sync(this);
+            task& t = *tasks[i];
+            t.sync(this);
 
-            if (tasks[i]->get_handle()->is_running())
-                enqueue_all(tasks[i]->get_dependants());
+            if (t.get_handle()->is_running())
+                enqueue_all(t.get_dependants());
             else
-                enqueue_all(tasks[i]->get_dependencies());
+                enqueue_all(t.get_dependencies());
 
         }, descrs[i]->get_data()));
 
