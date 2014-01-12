@@ -128,7 +128,7 @@ void initd_state::set_run_level(std::string const& run_level_name)
     for (task* d : i->second)
         mark_should_work(*d);
 
-    for (task2_sp const& tp : tasks)
+    for (task_sp const& tp : tasks)
         tp->sync(this);
 
     enqueue_all();
@@ -138,7 +138,7 @@ void initd_state::set_empty_run_level()
 {
     clear_should_work_flag();
 
-    for (task2_sp const& tp : tasks)
+    for (task_sp const& tp : tasks)
         tp->sync(this);
 
     enqueue_all();
@@ -151,7 +151,7 @@ bool initd_state::has_pending_operations() const
 
 void initd_state::clear_should_work_flag()
 {
-    for (task2_sp const& tp : tasks)
+    for (task_sp const& tp : tasks)
         tp->should_work = false;
 }
 
@@ -168,7 +168,7 @@ void initd_state::mark_should_work(task& t)
 
 void initd_state::enqueue_all()
 {
-    for (task2_sp const& tp : tasks)
+    for (task_sp const& tp : tasks)
         enqueue_one(*tp);
 }
 

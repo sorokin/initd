@@ -42,7 +42,7 @@ public:
     bool                 counted_in_pending_tasks;
 };
 
-typedef std::unique_ptr<task> task2_sp;
+typedef std::unique_ptr<task> task_sp;
 
 struct initd_state : private task_context
 {
@@ -69,7 +69,7 @@ private:
     state_context&                              ctx;
     sysapi::epoll&                              ep;
     std::map<std::string, std::vector<task*> >  run_levels;
-    std::vector<task2_sp>                       tasks;
+    std::vector<task_sp>                       tasks;
     size_t                                      pending_tasks;
 
     friend struct task;
