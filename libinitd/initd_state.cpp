@@ -4,66 +4,11 @@
 #include "task_description.h"
 
 #include "state_context.h"
+#include "task.h"
 #include "make_unique.h"
 
 #include <sstream>
 #include <stdexcept>
-
-task::task(async_task_handle_sp handle)
-    : handle(std::move(handle))
-    , should_work(false)
-    , stopped_dependencies(0)
-    , running_dependants(0)
-    , counted_in_dependencies(false)
-    , counted_in_dependants(false)
-    , counted_in_pending_tasks(false)
-{}
-
-bool task::are_dependencies_running() const
-{
-    return stopped_dependencies == 0;
-}
-
-bool task::are_dependants_stopped() const
-{
-    return running_dependants == 0;
-}
-
-void task::sync(initd_state* istate)
-{
-    bool affect_dependencies = handle->is_running() || handle->is_in_transition();
-    if (affect_dependencies != counted_in_dependencies)
-    {
-        increment_counter_in_dependencies(affect_dependencies ? 1 : -1);
-        counted_in_dependencies = affect_dependencies;
-    }
-
-    bool affect_dependants = handle->is_running() && !handle->is_in_transition();
-    if (affect_dependants != counted_in_dependants)
-    {
-        increment_counter_in_dependants(affect_dependants ? -1 : 1);
-        counted_in_dependants = affect_dependants;
-    }
-
-    bool affect_pending_tasks = handle->is_in_transition() || handle->is_running() != should_work;
-    if (affect_pending_tasks != counted_in_pending_tasks)
-    {
-        istate->pending_tasks += (affect_pending_tasks ? 1 : -1);
-        counted_in_pending_tasks = affect_pending_tasks;
-    }
-}
-
-void task::increment_counter_in_dependencies(std::ptrdiff_t delta)
-{
-    for (task* dep : dependencies)
-        dep->running_dependants += delta;
-}
-
-void task::increment_counter_in_dependants(std::ptrdiff_t delta)
-{
-    for (task* dep : dependants)
-        dep->stopped_dependencies += delta;
-}
 
 initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_descriptions descriptions)
     : ctx(ctx)
@@ -93,15 +38,12 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
     for (size_t i = 0; i != descrs.size(); ++i)
     {
         task_description* descr = descrs[i].get();
-        task* my_task = tasks[i].get();
+        task& my_task = *tasks[i];
 
         for (task_description* dep : descr->get_dependencies())
         {
-            task* dep_task = descr_to_task.find(dep)->second;
-            my_task->dependencies.push_back(dep_task);
-            dep_task->dependants.push_back(my_task);
-
-            ++my_task->stopped_dependencies;
+            task& dep_task = *descr_to_task.find(dep)->second;
+            add_task_dependency(my_task, dep_task);
         }
     }
 
@@ -113,6 +55,9 @@ initd_state::initd_state(state_context& ctx, sysapi::epoll& ep, task_description
         run_levels.insert(std::make_pair(name_to_rl.first, std::move(requisites)));
     }
 }
+
+initd_state::~initd_state()
+{}
 
 void initd_state::set_run_level(std::string const& run_level_name)
 {
@@ -126,7 +71,7 @@ void initd_state::set_run_level(std::string const& run_level_name)
 
     clear_should_work_flag();
     for (task* d : i->second)
-        mark_should_work(*d);
+        d->mark_should_work();
 
     for (task_sp const& tp : tasks)
         tp->sync(this);
@@ -155,38 +100,16 @@ void initd_state::clear_should_work_flag()
         tp->should_work = false;
 }
 
-void initd_state::mark_should_work(task& t)
-{
-    bool old = t.should_work;
-
-    t.should_work = true;
-
-    if (!old)
-        for (task* dep : t.dependencies)
-            mark_should_work(*dep);
-}
-
 void initd_state::enqueue_all()
 {
     for (task_sp const& tp : tasks)
-        enqueue_one(*tp);
+        tp->enqueue_this();
 }
 
 void initd_state::enqueue_all(std::vector<task*> const& tts)
 {
     for (task* t : tts)
-        enqueue_one(*t);
-}
-
-void initd_state::enqueue_one(task& t)
-{
-    if ((!t.handle->is_running() || t.handle->is_in_transition())
-        && t.should_work && t.are_dependencies_running())
-        t.handle->set_should_work(true);
-
-    if ((t.handle->is_running() || t.handle->is_in_transition())
-        && !t.should_work && t.are_dependants_stopped())
-        t.handle->set_should_work(false);
+        t->enqueue_this();
 }
 
 sysapi::epoll& initd_state::get_epoll()

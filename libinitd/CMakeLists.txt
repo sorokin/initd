@@ -11,6 +11,9 @@ include_directories("${LIBINITD_SOURCE_DIR}"
 add_library(initd
    initd_state.cpp
    initd_state.h
+   task.cpp
+   task.h
+   task_fwd.h
    task_context.h
    state_context.h
    tasks/async_task_handle.cpp
