@@ -23,8 +23,8 @@ struct task
     bool are_dependants_stopped() const;
 
     async_task_handle_sp handle;
-    std::vector<task*>  dependencies;
-    std::vector<task*>  dependants;
+    std::vector<task*>   dependencies;
+    std::vector<task*>   dependants;
     bool                 should_work;
 
     void sync(initd_state* istate);
@@ -69,7 +69,7 @@ private:
     state_context&                              ctx;
     sysapi::epoll&                              ep;
     std::map<std::string, std::vector<task*> >  run_levels;
-    std::vector<task_sp>                       tasks;
+    std::vector<task_sp>                        tasks;
     size_t                                      pending_tasks;
 
     friend struct task;
