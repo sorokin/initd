@@ -17,9 +17,8 @@ struct task
 
     void clear_should_work();
     void mark_should_work();
-    void enqueue_this();
-
     void sync(initd_state* istate);
+    void enqueue_this();
 
     friend void add_task_dependency(task& dependant, task& dependency);
 

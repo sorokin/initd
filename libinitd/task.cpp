@@ -55,17 +55,6 @@ void task::mark_should_work()
             dep->mark_should_work();
 }
 
-void task::enqueue_this()
-{
-    if ((!handle->is_running() || handle->is_in_transition())
-        && should_work && are_dependencies_running())
-        handle->set_should_work(true);
-
-    if ((handle->is_running() || handle->is_in_transition())
-        && !should_work && are_dependants_stopped())
-        handle->set_should_work(false);
-}
-
 void task::sync(initd_state* istate)
 {
     bool affect_dependencies = handle->is_running() || handle->is_in_transition();
@@ -88,6 +77,17 @@ void task::sync(initd_state* istate)
         istate->pending_tasks += (affect_pending_tasks ? 1 : -1);
         counted_in_pending_tasks = affect_pending_tasks;
     }
+}
+
+void task::enqueue_this()
+{
+    if ((!handle->is_running() || handle->is_in_transition())
+        && should_work && are_dependencies_running())
+        handle->set_should_work(true);
+
+    if ((handle->is_running() || handle->is_in_transition())
+        && !should_work && are_dependants_stopped())
+        handle->set_should_work(false);
 }
 
 bool task::are_dependencies_running() const
