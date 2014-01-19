@@ -38,8 +38,8 @@ private:
 private:
     state_context&                              ctx;
     sysapi::epoll&                              ep;
-    std::map<std::string, std::vector<task*> >  run_levels;
     std::vector<task_sp>                        tasks;
+    std::map<std::string, std::vector<task*> >  run_levels;
     size_t                                      pending_tasks;
 
     friend struct task;
