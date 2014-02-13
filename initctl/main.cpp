@@ -1,6 +1,6 @@
 #include <sstream>
 #include <stdexcept>
-#include <boost/optional.hpp>
+#include <iostream>
 
 #include "network/socket_address.h"
 #include "network/socket_common.h"

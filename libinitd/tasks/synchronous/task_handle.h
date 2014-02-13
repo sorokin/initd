@@ -2,6 +2,7 @@
 #define TASK_HANDLE_H
 
 #include <memory>
+#include <string>
 #include "task_handle_fwd.h"
 
 struct task_handle

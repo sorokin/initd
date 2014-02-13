@@ -1,5 +1,7 @@
 #include "async_start_stop_task.h"
 
+#include <cassert>
+
 #include "process.h"
 #include "current_directory.h"
 #include "task_context.h"

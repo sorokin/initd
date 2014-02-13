@@ -1,5 +1,7 @@
 #include "create_async_task_handle.h"
 
+#include <cassert>
+
 #include "sync_task_adaptor.h"
 #include "async_start_stop_task.h"
 

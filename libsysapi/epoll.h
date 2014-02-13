@@ -4,6 +4,7 @@
 #include "file_descriptor.h"
 
 #include <functional>
+#include <cstdint>
 
 namespace sysapi
 {

@@ -1,6 +1,7 @@
 #ifndef BINARY_STREAM_H
 #define BINARY_STREAM_H
 
+#include <cstdint>
 #include <type_traits>
 #include <vector>
 #include <string>

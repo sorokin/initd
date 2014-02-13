@@ -1,6 +1,7 @@
 #ifndef ASYNC_TASK_HANDLE_H
 #define ASYNC_TASK_HANDLE_H
 
+#include <string>
 #include "async_task_handle_fwd.h"
 
 struct async_task_handle
