@@ -2,11 +2,14 @@ cmake_minimum_required (VERSION 2.6)
 
 project(LIBINITD)
 
+find_package(Boost 1.48)
+
 include_directories("${LIBINITD_SOURCE_DIR}"
-		    "${LIBINITD_COMMON_SOURCE_DIR}"
-		    "${LIBINITD_CONFIG_SOURCE_DIR}"
-		    "${LIBSYSAPI_SOURCE_DIR}"
-		    "${LIBBINSTREAM_SOURCE_DIR}")
+                    "${LIBINITD_COMMON_SOURCE_DIR}"
+                    "${LIBINITD_CONFIG_SOURCE_DIR}"
+                    "${LIBSYSAPI_SOURCE_DIR}"
+                    "${LIBBINSTREAM_SOURCE_DIR}"
+                    "${Boost_INCLUDE_DIR}")
 
 add_library(initd
    initd_state.cpp

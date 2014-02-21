@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 
+find_package(Boost 1.48 REQUIRED)
+
+include_directories("${Boost_INCLUDE_DIR}")
+
 project(LIBBINSTREAM)
 
 add_library(binstream
