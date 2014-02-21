@@ -19,8 +19,8 @@ namespace sysapi
                              socket_address const& local_address,
                              on_accept_t on_accept);
 
-        stream_server_socket(stream_server_socket const&);
-        stream_server_socket& operator=(stream_server_socket const&);
+        stream_server_socket(stream_server_socket const&) = delete;
+        stream_server_socket& operator=(stream_server_socket const&) = delete;
 
     private:
         epoll&             ep;
