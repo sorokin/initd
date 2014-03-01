@@ -127,6 +127,17 @@ void dump(start_stop_task_data const& data, std::ostream& out)
     out << "\n"
         << "}\n";
 }
+
+void dump(respawn_task_data const& data, std::ostream& out)
+{
+    out << "respawn\n"
+        << "{\n"
+        << "    start = ";
+    dump(data.start, out);
+    out << "\n"
+        << "}\n";
+}
+
 void dump(null_task_data const& data, std::ostream& out)
 {
     out << "null\n"
