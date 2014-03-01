@@ -74,7 +74,7 @@ void async_start_stop_task::enqueue_job()
             sysapi::execv(task_data.start.cmd.executable, task_data.start.cmd.arguments);
         });
 
-        current_operation = boost::in_place(pid, [this]() {
+        current_operation = boost::in_place(pid, [this](sysapi::child_status& status) {
             async_start_stop_task* that = this;
 
             assert(!that->running);
@@ -91,7 +91,7 @@ void async_start_stop_task::enqueue_job()
             sysapi::execv(task_data.stop.cmd.executable, task_data.stop.cmd.arguments);
         });
 
-        current_operation = boost::in_place(pid, [this]() {
+        current_operation = boost::in_place(pid, [this](sysapi::child_status& status) {
             async_start_stop_task* that = this;
 
             assert(that->running);

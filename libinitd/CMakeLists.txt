@@ -23,6 +23,8 @@ add_library(initd
    tasks/sync_task_adaptor.h
    tasks/async_start_stop_task.cpp
    tasks/async_start_stop_task.h
+   tasks/async_respawn_task.cpp
+   tasks/async_respawn_task.h
    tasks/create_async_task_handle.cpp
    tasks/create_async_task_handle.h
    tasks/synchronous/task_handle.cpp

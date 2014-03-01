@@ -13,6 +13,8 @@ add_library(initd-config
    control_task_data.h
    start_stop_task_data.h
    start_stop_task_data.cpp
+   respawn_task_data.h
+   respawn_task_data.cpp
    task_data.h
    task_data.cpp
    task_description_fwd.h

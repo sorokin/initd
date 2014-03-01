@@ -40,7 +40,7 @@ void report_duplicates(std::multimap<K, V> const& m, F f)
     }
 }
 
-std::multimap<std::string, property_node*> make_properties_map(struct_node const& cnode, error_tag_sink& esink)
+inline std::multimap<std::string, property_node*> make_properties_map(struct_node const& cnode, error_tag_sink& esink)
 {
     std::multimap<std::string, property_node*> properties_by_name;
     for (property_node_sp const& p : cnode.get_properties())
@@ -54,45 +54,13 @@ std::multimap<std::string, property_node*> make_properties_map(struct_node const
 template <>
 struct read_value_node_impl<hostname_task_data>
 {
-    static const char* get_type_name()
-    {
-        return "sethostname";
-    }
+    static const char* get_type_name();
 
-    static bool can_read(value_node const& node)
-    {
-        if (node.get_type() != value_node_type::struct_)
-            return false;
+    static bool can_read(value_node const& node);
 
-        struct_node const& cnode = static_cast<struct_node const&>(node);
-        return cnode.get_tag().get_text() == get_type_name();
-    }
+    static boost::optional<hostname_task_data> read(value_node const& node, error_tag_sink& esink);
 
-    static boost::optional<hostname_task_data> read(value_node const& node, error_tag_sink& esink)
-    {
-        assert(node.get_type() == value_node_type::struct_);
-
-        struct_node const& cnode = static_cast<struct_node const&>(node);
-        assert(cnode.get_tag().get_text() == get_type_name());
-
-        std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
-
-        hostname_task_data data;
-
-        boost::optional<std::string> hostname1 = extract_property_from_map<std::string>(cnode, properties_by_name, "hostname", esink);
-        if (!hostname1)
-            return boost::none;
-
-        data.hostname = *hostname1;
-        data.no_restore = extract_property_from_map<bool>(cnode, properties_by_name, "no_restore", false, esink);
-
-        return data;
-    }
-
-    static boost::optional<hostname_task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
-    {
-        return boost::none;
-    }
+    static boost::optional<hostname_task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&);
 };
 
 template <>
@@ -213,8 +181,8 @@ struct read_value_node_impl<command>
 
         std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
 
-        boost::optional<cmd_line> cmd = extract_property_from_map<cmd_line>(cnode, properties_by_name, "cmd", esink);
-        boost::optional<std::string> working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", esink);
+        boost::optional<cmd_line> cmd = extract_property_from_map<cmd_line>(cnode, properties_by_name, "cmd", requiredness::required, esink);
+        boost::optional<std::string> working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", requiredness::required, esink);
         if (!cmd || !working_directory)
             return boost::none;
 
@@ -260,13 +228,65 @@ struct read_value_node_impl<start_stop_task_data>
 
         start_stop_task_data data;
 
-        boost::optional<command> start_cmd = extract_property_from_map<command>(cnode, properties_by_name, "start", esink);
-        boost::optional<command> stop_cmd = extract_property_from_map<command>(cnode, properties_by_name, "stop", esink);
+        boost::optional<command> start_cmd = extract_property_from_map<command>(cnode, properties_by_name, "start", requiredness::required, esink);
+        boost::optional<command> stop_cmd = extract_property_from_map<command>(cnode, properties_by_name, "stop", requiredness::required, esink);
         if (!start_cmd || !stop_cmd)
             return boost::none;
 
         data.start = *start_cmd;
         data.stop  = *stop_cmd;
+
+        return data;
+    }
+
+    static boost::optional<null_task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
+    {
+        return boost::none;
+    }
+};
+
+template <>
+struct read_value_node_impl<respawn_task_data>
+{
+    static const char* get_type_name()
+    {
+        return "respawn";
+    }
+
+    static bool can_read(value_node const& node)
+    {
+        if (node.get_type() != value_node_type::struct_)
+            return false;
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        return cnode.get_tag().get_text() == get_type_name();
+    }
+
+    static boost::optional<respawn_task_data> read(value_node const& node, error_tag_sink& esink)
+    {
+        assert(node.get_type() == value_node_type::struct_);
+
+        struct_node const& cnode = static_cast<struct_node const&>(node);
+        assert(cnode.get_tag().get_text() == get_type_name());
+
+        std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+
+        respawn_task_data data;
+
+        boost::optional<command> start_cmd = extract_property_from_map<command>(cnode, properties_by_name, "start", requiredness::required, esink);
+        boost::optional<command> stop_cmd = extract_property_from_map<command>(cnode, properties_by_name, "stop", requiredness::not_required, esink);
+        boost::optional<int> timeout = extract_property_from_map<int>(cnode, properties_by_name, "timeout", 30, esink);
+
+        if (!start_cmd)
+            return boost::none;
+
+        data.start = *start_cmd;
+
+        if (stop_cmd)
+            data.stop = *stop_cmd;
+
+        if (timeout)
+            data.timeout = *timeout;
 
         return data;
     }
@@ -305,7 +325,7 @@ struct read_value_node_impl<control_task_data>
 
         control_task_data data;
 
-        boost::optional<std::string> uds_filename = extract_property_from_map<std::string>(cnode, properties_by_name, "uds_filename", esink);
+        boost::optional<std::string> uds_filename = extract_property_from_map<std::string>(cnode, properties_by_name, "uds_filename", requiredness::required, esink);
         if (!uds_filename)
             return boost::none;
         data.uds_filename = *uds_filename;
@@ -354,6 +374,7 @@ struct read_value_node_impl<null_task_data>
     }
 };
 
+
 template <>
 struct read_value_node_impl<task_data>
 {
@@ -366,6 +387,7 @@ struct read_value_node_impl<task_data>
     {
         return read_value_node_impl<hostname_task_data>::can_read(node)
             || read_value_node_impl<start_stop_task_data>::can_read(node)
+            || read_value_node_impl<respawn_task_data>::can_read(node)
             || read_value_node_impl<control_task_data>::can_read(node)
             || read_value_node_impl<null_task_data>::can_read(node);
     }
@@ -376,6 +398,8 @@ struct read_value_node_impl<task_data>
             return optional_cast<task_data>(read_value_node<hostname_task_data>(node, esink));
         else if (can_read_value_node<start_stop_task_data>(node))
             return optional_cast<task_data>(read_value_node<start_stop_task_data>(node, esink));
+        else if (can_read_value_node<respawn_task_data>(node))
+            return optional_cast<task_data>(read_value_node<respawn_task_data>(node, esink));
         else if (can_read_value_node<control_task_data>(node))
             return optional_cast<task_data>(read_value_node<control_task_data>(node, esink));
         else if (can_read_value_node<null_task_data>(node))
@@ -393,7 +417,7 @@ struct read_value_node_impl<task_data>
     }
 };
 
-boost::optional<task_data> read_task(task_node const& node, error_tag_sink& esink)
+inline boost::optional<task_data> read_task(task_node const& node, error_tag_sink& esink)
 {
     if (!node.get_value())
         return boost::none;

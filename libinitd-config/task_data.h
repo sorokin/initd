@@ -6,11 +6,12 @@
 #include "mount_task_data.h"
 #include "hostname_task_data.h"
 #include "start_stop_task_data.h"
+#include "respawn_task_data.h"
 #include "control_task_data.h"
 #include "null_task_data.h"
 
 typedef boost::variant<mount_task_data, hostname_task_data,
                        start_stop_task_data, control_task_data,
-                       null_task_data> task_data;
+                       respawn_task_data, null_task_data> task_data;
 
 #endif
