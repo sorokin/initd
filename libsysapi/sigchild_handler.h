@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <functional>
+#include "process.h"
+#include "function_queue.h"
 
 namespace sysapi
 {
@@ -12,9 +14,9 @@ namespace sysapi
 
     struct wait_child
     {
-        typedef std::function<void ()> callback_t;
+        typedef std::function<void (child_status&)> detailed_callback_t;
 
-        wait_child(pid_t pid, callback_t callback);
+        wait_child(pid_t pid, detailed_callback_t callback);
         wait_child(wait_child const&) = delete;
         ~wait_child();
 
@@ -22,7 +24,7 @@ namespace sysapi
 
     private:
         pid_t pid;
-        callback_t callback;
+        detailed_callback_t callback;
 
         friend struct sigchild_handler;
     };
