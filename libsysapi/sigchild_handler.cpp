@@ -19,13 +19,13 @@ struct sysapi::sigchild_handler
         , sfd(ep, make_sigset(SIGCHLD), [this](signalfd_siginfo const& sinfo) {
             for (;;)
             {
-                pid_t pid = reap_child();
-                if (pid < 0)
+                boost::optional<sysapi::child_status> child = reap_child();
+                if (!child)
                     break;
 
-                auto i = handlers.find(pid);
+                auto i = handlers.find(child->pid);
                 if (i != handlers.end())
-                    i->second->callback();
+                    i->second->callback(child->status);
             }
         })
     {}
@@ -84,4 +84,3 @@ install_sigchild_handler::~install_sigchild_handler()
     assert(sigchild_handler::instance);
     sigchild_handler::instance = nullptr;
 }
-
