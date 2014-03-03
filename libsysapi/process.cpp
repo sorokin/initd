@@ -11,6 +11,11 @@
 
 using namespace sysapi;
 
+child_status::child_status(pid_t pid, int status)
+    : pid(pid)
+    , status(status)
+{}
+
 pid_t sysapi::fork()
 {
     pid_t pid = ::fork();
@@ -72,19 +77,19 @@ void sysapi::waitpid(pid_t pid)
     assert(wpid == pid);
 }
 
-pid_t sysapi::reap_child()
+boost::optional<child_status> sysapi::reap_child()
 {
     int status;
     pid_t wpid = ::waitpid(-1, &status, WNOHANG);
     if (wpid == 0)
-        return -1;
+        return boost::none;
 
     if (wpid < 0)
     {
         int err = errno;
 
         if (err == ECHILD)
-            return -1;
+            return boost::none;
 
         std::stringstream ss;
         ss << "unable to waitpid, error: " << sysapi::errno_to_text(err);
@@ -92,7 +97,7 @@ pid_t sysapi::reap_child()
         throw std::runtime_error(ss.str());
     }
 
-    return wpid;
+    return child_status(wpid, status);
 }
 
 void sysapi::execv(std::string const& executable, std::vector<std::string> const& arguments)

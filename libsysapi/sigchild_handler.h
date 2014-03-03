@@ -7,12 +7,12 @@
 namespace sysapi
 {
     struct epoll;
-
+    struct child_status;
     struct sigchild_handler;
 
     struct wait_child
     {
-        typedef std::function<void ()> callback_t;
+        typedef std::function<void (int status)> callback_t;
 
         wait_child(pid_t pid, callback_t callback);
         wait_child(wait_child const&) = delete;
