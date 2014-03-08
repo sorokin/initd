@@ -1,46 +1,10 @@
-#ifndef READ_TASK_DATA_H
-#define READ_TASK_DATA_H
+#ifndef READ_VALUE_NODE_TASKS_H
+#define READ_VALUE_NODE_TASKS_H
 
-#include <algorithm>
-
-#include <boost/next_prior.hpp>
-
-#include "task_data.h"
-#include "hostname_task_data.h"
-#include "control_task_data.h"
-#include "null_task_data.h"
 #include "read_value_node.h"
-#include "parser/task_node.h"
-#include "lexer/lexer.h"
-#include "optional_cast.h"
+#include "task_data.h"
 
-struct top_level_node;
-
-template <typename K, typename V, typename F>
-void report_duplicates(std::multimap<K, V> const& m, F f)
-{
-    if (m.empty())
-        return;
-
-    typedef typename std::multimap<K, V>::const_iterator const_iterator;
-
-    bool last_reported = false;
-
-    for (const_iterator i = boost::next(m.begin()); i != m.end(); ++i)
-    {
-        const_iterator pi = boost::prior(i);
-        if (pi->first == i->first)
-        {
-            if (!last_reported)
-                f(pi->second);
-
-            f(i->second);
-            last_reported = true;
-        }
-    }
-}
-
-std::multimap<std::string, property_node*> make_properties_map(struct_node const& cnode, error_tag_sink& esink);
+struct pseudo_identifier_value_node;
 
 template <>
 struct read_value_node_impl<hostname_task_data>
@@ -104,7 +68,5 @@ struct read_value_node_impl<task_data>
     static boost::optional<task_data> read(value_node const& node, error_tag_sink& esink);
     static boost::optional<task_data> value_for_pseudo_identifier(pseudo_identifier_value_node const&);
 };
-
-boost::optional<task_data> read_task(task_node const& node, error_tag_sink& esink);
 
 #endif

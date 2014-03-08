@@ -66,8 +66,14 @@ add_library(initd-readconfig
    line_map/print_error.cpp
    read_value_node/read_value_node.h
    read_value_node/read_value_node.cpp
-   read_value_node/read_task_data.h
-   read_value_node/read_task_data.cpp
+   read_value_node/read_value_node_primitives.h
+   read_value_node/read_value_node_primitives.cpp
+   read_value_node/read_value_node_tasks.h
+   read_value_node/read_value_node_tasks.cpp
+   read_value_node/extract_property_from_map.h
+   read_value_node/report_duplicates.h
+   read_value_node/read_task.h
+   read_value_node/read_task.cpp
    read_value_node/read_task_description.h
    read_value_node/read_task_description.cpp
 )

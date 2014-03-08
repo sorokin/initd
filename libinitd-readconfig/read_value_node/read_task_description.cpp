@@ -11,12 +11,15 @@
 #include "line_map/line_map.h"
 #include "line_map/print_error.h"
 
-#include "read_task_data.h"
+#include "read_task.h"
+#include "report_duplicates.h"
 #include "task_description.h"
 #include "task_descriptions.h"
 
 #include "make_unique.h"
 #include "file_descriptor.h"
+
+#include <sstream>
 
 namespace
 {
