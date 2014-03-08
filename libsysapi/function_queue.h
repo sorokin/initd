@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "epoll.h"
-#include "file_descriptor.h"
+#include "eventfd.h"
 
 namespace sysapi
 {
@@ -17,11 +17,12 @@ namespace sysapi
 
         void push(function_t f);
 
+        function_queue(function_queue const&) = delete;
+        function_queue& operator=(function_queue const&) = delete;
+
     private:
-        epoll* ep;
-        std::pair<file_descriptor, file_descriptor> pipe;
+        eventfd efd;
         std::deque<function_t> queue;
-        epoll_registration epr;
     };
 }
 #endif

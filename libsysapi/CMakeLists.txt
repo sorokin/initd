@@ -11,6 +11,8 @@ add_library(sysapi
    epoll.h
    signalfd.cpp
    signalfd.h
+   eventfd.cpp
+   eventfd.h
    block_signals.cpp
    block_signals.h
    sigchild_handler.cpp

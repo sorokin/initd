@@ -8,14 +8,7 @@
 using namespace sysapi;
 
 function_queue::function_queue(epoll& ep)
-    : ep(&ep)
-    , pipe(create_pipe(O_NONBLOCK | O_CLOEXEC))
-    , epr(ep, pipe.first.getfd(), EPOLLIN, [this](uint32_t events) {
-        assert(events == EPOLLIN);
-
-        char dummy;
-        pipe.first.read(&dummy, sizeof dummy);
-
+    : efd(ep, [this]() {
         function_t f = std::move(queue.front());
         queue.pop_front();
 
@@ -26,7 +19,5 @@ function_queue::function_queue(epoll& ep)
 void function_queue::push(function_t f)
 {
     queue.push_back(std::move(f));
-
-    char dummy = '\0';
-    pipe.second.write(&dummy, sizeof dummy);
+    efd.notify();
 }
