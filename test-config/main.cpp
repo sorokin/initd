@@ -20,6 +20,9 @@
 
 #include "read_value_node/read_task_description.h"
 
+#include "current_directory.h"
+#include "tests_directory.h"
+
 namespace fs = boost::filesystem;
 
 boost::optional<std::vector<char> > read_entire_file_if_exists(fs::path const& filename)
@@ -220,6 +223,7 @@ void run_test_on_file(fs::path const& filename)
 
 bool init_function()
 {
+    sysapi::set_current_directory(get_tests_directory());
     for (fs::directory_iterator i = fs::directory_iterator("./config_tests/"), end; i != end; ++i)
         if (i->path().extension() == ".txt")
         {

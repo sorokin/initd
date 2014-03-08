@@ -1,0 +1,10 @@
+#ifndef TESTS_DIRECTORY_H
+#define TESTS_DIRECTORY_H
+
+inline char const* get_tests_directory()
+{
+    return "@TEST_CONFIG_SOURCE_DIR@";
+}
+
+#endif
+
