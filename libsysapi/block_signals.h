@@ -15,6 +15,9 @@ namespace sysapi
         block_signals(const sigset_t&);
         ~block_signals();
 
+        block_signals(block_signals const&) = delete;
+        block_signals operator=(block_signals const&) = delete;
+
     private:
         sigset_t oldset;
     };

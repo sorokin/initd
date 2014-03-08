@@ -15,6 +15,9 @@ namespace sysapi
     {
         signalfd(epoll& ep, const sigset_t& mask, std::function<void (signalfd_siginfo const&)> const& callback);
 
+        signalfd(signalfd const&) = delete;
+        signalfd& operator=(signalfd const&) = delete;
+
     private:
         file_descriptor sfd;
         epoll_registration epr;
