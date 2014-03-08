@@ -36,82 +36,28 @@ std::string get_type_by_value_node(value_node const& node);
 template <>
 struct read_value_node_impl<int>
 {
-    static const char* get_type_name()
-    {
-        return "int";
-    }
-
-    static bool can_read(value_node const& node)
-    {
-        return node.get_type() == value_node_type::integer;
-    }
-
-    static boost::optional<int> read(value_node const& node, error_tag_sink& esink)
-    {
-        assert(can_read(node));
-
-        integer_node const& cnode = static_cast<integer_node const&>(node);
-        return cnode.get_token().get_value();
-    }
-
-    static boost::optional<int> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
-    {
-        return boost::none;
-    }
+    static const char* get_type_name();
+    static bool can_read(value_node const& node);
+    static boost::optional<int> read(value_node const& node, error_tag_sink& esink);
+    static boost::optional<int> value_for_pseudo_identifier(pseudo_identifier_value_node const&);
 };
 
 template <>
 struct read_value_node_impl<std::string>
 {
-    static const char* get_type_name()
-    {
-        return "string";
-    }
-
-    static bool can_read(value_node const& node)
-    {
-        return node.get_type() == value_node_type::string;
-    }
-
-    static boost::optional<std::string> read(value_node const& node, error_tag_sink& esink)
-    {
-        assert(can_read(node));
-
-        string_node const& cnode = static_cast<string_node const&>(node);
-        return cnode.get_token().get_value();
-    }
-
-    static boost::optional<std::string> value_for_pseudo_identifier(pseudo_identifier_value_node const& node)
-    {
-        return node.get_token().get_text();
-    }
+    static const char* get_type_name();
+    static bool can_read(value_node const& node);
+    static boost::optional<std::string> read(value_node const& node, error_tag_sink& esink);
+    static boost::optional<std::string> value_for_pseudo_identifier(pseudo_identifier_value_node const& node);
 };
 
 template <>
 struct read_value_node_impl<bool>
 {
-    static const char* get_type_name()
-    {
-        return "bool";
-    }
-
-    static bool can_read(value_node const& node)
-    {
-        return node.get_type() == value_node_type::boolean;
-    }
-
-    static boost::optional<bool> read(value_node const& node, error_tag_sink& esink)
-    {
-        assert(can_read(node));
-
-        boolean_node const& cnode = static_cast<boolean_node const&>(node);
-        return cnode.get_value();
-    }
-
-    static boost::optional<bool> value_for_pseudo_identifier(pseudo_identifier_value_node const&)
-    {
-        return boost::none;
-    }
+    static const char* get_type_name();
+    static bool can_read(value_node const& node);
+    static boost::optional<bool> read(value_node const& node, error_tag_sink& esink);
+    static boost::optional<bool> value_for_pseudo_identifier(pseudo_identifier_value_node const&);
 };
 
 template <typename T>
