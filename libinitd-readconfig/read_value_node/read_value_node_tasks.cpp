@@ -177,14 +177,14 @@ boost::optional<command> read_value_node_impl<command>::read(value_node const& n
     std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
 
     boost::optional<cmd_line> cmd = extract_property_from_map<cmd_line>(cnode, properties_by_name, "cmd", esink);
-    boost::optional<std::string> working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", esink);
-    if (!cmd || !working_directory)
+    std::string working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", "/", esink);
+    if (!cmd)
         return boost::none;
 
     command data;
 
     data.cmd = *cmd;
-    data.working_directory = *working_directory;
+    data.working_directory = working_directory;
 
     return data;
 }

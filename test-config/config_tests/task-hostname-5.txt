@@ -1,0 +1,4 @@
+task a = sethostname
+{
+    hostname = "localhost"
+};
