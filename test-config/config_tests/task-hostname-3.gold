@@ -1,9 +1,6 @@
 ./config_tests/task-hostname-3.txt:2:15~24: excepted value of type "string", but identifier found
     hostname = localhost
                ~~~~~~~~~
-./config_tests/task-hostname-3.txt:0:9~20: property "no_restore" is not found in struct "sethostname"
-task a = sethostname
-         ~~~~~~~~~~~
 
 task a = sethostname
 {

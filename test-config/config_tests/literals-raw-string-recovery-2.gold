@@ -4,9 +4,6 @@
 ./config_tests/literals-raw-string-recovery-2.txt:3:9: expected ','
 world)abc
          ^
-./config_tests/literals-raw-string-recovery-2.txt:0:9~20: property "no_restore" is not found in struct "sethostname"
-task a = sethostname
-         ~~~~~~~~~~~
 
 task a = sethostname
 {

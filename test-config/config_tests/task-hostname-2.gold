@@ -4,9 +4,6 @@
 ./config_tests/task-hostname-2.txt:3:4~12: duplicate property declaration
     hostname = "localhost2",
     ~~~~~~~~
-./config_tests/task-hostname-2.txt:0:9~20: property "no_restore" is not found in struct "sethostname"
-task a = sethostname
-         ~~~~~~~~~~~
 
 task a = sethostname
 {

@@ -63,11 +63,45 @@ T extract_property_from_map(struct_node const& cnode,
                             T default_value,
                             error_tag_sink& esink)
 {
-    boost::optional<T> t = extract_property_from_map<T>(cnode, properties_by_name, name, esink);
-    if (!t)
+    auto i = properties_by_name.find(name);
+    if (i == properties_by_name.end())
         return default_value;
 
-    return *t;
+    property_node* p = i->second;
+
+    if (!p->get_value())
+        return default_value;
+
+    if (p->get_value()->get_type() == value_node_type::pseudo_identifier)
+    {
+        pseudo_identifier_value_node const& cvalue = static_cast<pseudo_identifier_value_node const&>(*p->get_value());
+
+        std::stringstream ss;
+        ss << "excepted value of type \"" << read_value_node_impl<T>::get_type_name() << "\", but identifier found";
+
+        esink.push(error_tag(cvalue.get_token().get_range(), ss.str()));
+        if (auto v = read_value_node_impl<T>::value_for_pseudo_identifier(cvalue))
+            return *v;
+
+        return default_value;
+    }
+
+    if (!can_read_value_node<T>(*p->get_value()))
+    {
+        std::stringstream ss;
+        ss << "property \"" << name
+           << "\" has type \"" << read_value_node_impl<T>::get_type_name()
+           << "\", but is initialized with \""
+           << get_type_by_value_node(*p->get_value()) << "\"";
+
+        esink.push(error_tag(p->get_eq().get_range(), ss.str()));
+        return default_value;
+    }
+
+    if (auto v = read_value_node<T>(*p->get_value(), esink))
+        return *v;
+
+    return default_value;
 }
 
 #endif
