@@ -216,7 +216,12 @@ void run_test_on_file(fs::path const& filename)
 
     if (output_data != *gold_data)
     {
-        BOOST_CHECK_MESSAGE(false, "gold/output mismatch");
+        std::stringstream ss;
+        ss << "gold/output mismatch\n"
+           << "    diff '" << gold_filename.filename().string() << "' '" << out_filename.filename().string() << "' | colordiff\n"
+           << "    mv '" << out_filename.filename().string() << "' '" << gold_filename.filename().string() << "'";
+
+        BOOST_CHECK_MESSAGE(false, ss.str());
         write_entire_file(out_filename, output);
     }
 }
