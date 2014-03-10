@@ -27,6 +27,8 @@ add_library(sysapi
    process.h
    reboot.cpp
    reboot.h
+   timerfd.cpp
+   timerfd.h
    network/socket_address.cpp
    network/socket_address.h
    network/stream_server_socket.cpp
