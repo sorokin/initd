@@ -13,15 +13,11 @@
 
 namespace
 {
-    std::multimap<std::string, property_node*> make_properties_map(struct_node const& cnode, error_tag_sink& esink)
+    std::multimap<std::string, property_node*> const& get_properties_map(struct_node const& cnode, error_tag_sink& esink)
     {
-        std::multimap<std::string, property_node*> properties_by_name;
-        for (property_node_sp const& p : cnode.get_properties())
-            properties_by_name.insert(std::make_pair(p->get_key().get_text(), p.get()));
+        report_duplicates(cnode.get_properties_by_name(), [&](property_node* p) { esink.push(error_tag(p->get_key().get_range(), "duplicate property declaration")); });
 
-        report_duplicates(properties_by_name, [&](property_node* p) { esink.push(error_tag(p->get_key().get_range(), "duplicate property declaration")); });
-
-        return properties_by_name;
+        return cnode.get_properties_by_name();
     }
 }
 
@@ -46,7 +42,7 @@ boost::optional<hostname_task_data> read_value_node_impl<hostname_task_data>::re
     struct_node const& cnode = static_cast<struct_node const&>(node);
     assert(cnode.get_tag().get_text() == get_type_name());
 
-    std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+    std::multimap<std::string, property_node*> const& properties_by_name = get_properties_map(cnode, esink);
 
     hostname_task_data data;
 
@@ -174,7 +170,7 @@ boost::optional<command> read_value_node_impl<command>::read(value_node const& n
     struct_node const& cnode = static_cast<struct_node const&>(node);
     assert(cnode.get_tag().get_text() == get_type_name());
 
-    std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+    std::multimap<std::string, property_node*> const& properties_by_name = get_properties_map(cnode, esink);
 
     boost::optional<cmd_line> cmd = extract_property_from_map<cmd_line>(cnode, properties_by_name, "cmd", esink);
     std::string working_directory = extract_property_from_map<std::string>(cnode, properties_by_name, "working_directory", "/", esink);
@@ -215,7 +211,7 @@ boost::optional<start_stop_task_data> read_value_node_impl<start_stop_task_data>
     struct_node const& cnode = static_cast<struct_node const&>(node);
     assert(cnode.get_tag().get_text() == get_type_name());
 
-    std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+    std::multimap<std::string, property_node*> const& properties_by_name = get_properties_map(cnode, esink);
 
     start_stop_task_data data;
 
@@ -256,7 +252,7 @@ boost::optional<control_task_data> read_value_node_impl<control_task_data>::read
     struct_node const& cnode = static_cast<struct_node const&>(node);
     assert(cnode.get_tag().get_text() == get_type_name());
 
-    std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+    std::multimap<std::string, property_node*> const& properties_by_name = get_properties_map(cnode, esink);
 
     control_task_data data;
 
@@ -294,7 +290,7 @@ boost::optional<null_task_data> read_value_node_impl<null_task_data>::read(value
     struct_node const& cnode = static_cast<struct_node const&>(node);
     assert(cnode.get_tag().get_text() == get_type_name());
 
-    std::multimap<std::string, property_node*> properties_by_name = make_properties_map(cnode, esink);
+    get_properties_map(cnode, esink);
 
     return null_task_data();
 }
