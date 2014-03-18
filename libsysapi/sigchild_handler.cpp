@@ -81,6 +81,6 @@ install_sigchild_handler::install_sigchild_handler(epoll& ep)
 
 install_sigchild_handler::~install_sigchild_handler()
 {
-    assert(sigchild_handler::instance);
+    assert(sigchild_handler::instance == handler.get());
     sigchild_handler::instance = nullptr;
 }
