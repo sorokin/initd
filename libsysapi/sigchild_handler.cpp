@@ -19,7 +19,7 @@ struct sysapi::sigchild_handler
         , sfd(ep, make_sigset(SIGCHLD), [this](signalfd_siginfo const& sinfo) {
             for (;;)
             {
-                boost::optional<sysapi::child_status> child = reap_child();
+                boost::optional<child_status> child = reap_child();
                 if (!child)
                     break;
 
