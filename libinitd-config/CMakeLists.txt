@@ -11,8 +11,9 @@ add_library(initd-config
    mount_options.cpp
    mount_options.h
    control_task_data.h
+   command.h
+   command.cpp
    start_stop_task_data.h
-   start_stop_task_data.cpp
    task_data.h
    task_data.cpp
    task_description_fwd.h
